@@ -41,9 +41,9 @@ class ModelHandler:
         predict(self, prompt_text): Generates text based on the prompt and chat history.
 
     """
-    def __init__(self, model_id, max_new_tokens=600, max_length=600):
+    def __init__(self, model_id, max_new_tokens=600, max_length=600) -> None:
         logger.info('Initializing model %s.', model_id)
-        device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        device: str = "cuda:0" if torch.cuda.is_available() else "cpu"
         logger.info('Model will be initialized on %s.', device)
         self.pipe = pipeline(
             "text-generation",
@@ -53,7 +53,7 @@ class ModelHandler:
             max_length=max_length,
         )
         logger.info('Model %s has been initialized.', model_id)
-        self.chat_history = []
+        self.chat_history: list[dict] = []
 
     def clear_history(self) -> None:
         """Clears the chat history."""
@@ -66,7 +66,7 @@ class ModelHandler:
                 Args:
                     prompt_text (str): The prompt text.
         """
-        prompt ={'role': 'user', 'content': prompt_text}
+        prompt: dict ={'role': 'user', 'content': prompt_text}
         self.chat_history.append(prompt)
         logger.info('%s has been added to chat history.', prompt)
 
@@ -81,7 +81,7 @@ class ModelHandler:
         """
         self.preprocess_prompt(prompt_text)
         try:
-            output = self.pipe(self.chat_history)[0]['generated_text'][-1]
+            output: dict = self.pipe(self.chat_history)[0]['generated_text'][-1]
         except Exception as e:
             logger.error("Error during text generation: %s", e)
             return "Sorry, I encountered an error while processing your request."

@@ -10,6 +10,7 @@ for cross-origin requests. It also includes basic logging for monitoring and deb
 """
 import logging
 from flask import Flask, render_template, request, jsonify
+from flask.wrappers import Response
 from flask_cors import CORS
 from model import ModelHandler
 
@@ -18,25 +19,25 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 app.logger.setLevel(logging.ERROR)
 
-model = ModelHandler("meta-llama/Llama-3.2-1B-Instruct")
+model: ModelHandler = ModelHandler("meta-llama/Llama-3.2-1B-Instruct")
 
 # Define the route for the index page
 @app.route('/', methods=['GET'])
-def index():
+def index() -> str:
     """Render the index page for the chatbot."""
     return render_template('index.html')  # Render the index.html template
 
 # Define the route for processing messages
 @app.route('/process-message', methods=['POST'])
-def process_message_route():
+def process_message_route() -> tuple[Response, int]:
     """Process user messages and return chatbot responses."""
     try:
         # Extract the user's message from the request
-        user_message = request.json['userMessage']
+        user_message: str = request.json['userMessage']
         app.logger.info('User message: %s', user_message)
 
         # Process the user's message using the worker module
-        bot_response = model.predict(user_message)
+        bot_response: str = model.predict(user_message)
         app.logger.info('Bot response: %s', bot_response)
 
         # Return the bot's response as JSON
@@ -54,7 +55,7 @@ def process_message_route():
 
 # Define the route for resetting model chat history
 @app.route('/reset-chat-history', methods=['GET'])
-def reset_chat_history_route():
+def reset_chat_history_route() -> tuple[Response, int]:
     """Reset the chat history."""
     try:
         model.clear_history()
@@ -72,4 +73,4 @@ def reset_chat_history_route():
 
 # Run the Flask app
 if __name__ == "__main__":
-    app.run(debug=True, port=8000, host='0.0.0.0')
+    app.run()
