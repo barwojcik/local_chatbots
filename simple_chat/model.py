@@ -30,6 +30,7 @@ class ModelHandler:
     Attributes:
         pipe (transformers.Pipeline): The text generation pipeline.
         chat_history (list): A list of previous interactions in the chat.
+        max_history_messages (int): The maximum number of messages to keep in the chat history.
 
     Args:
         model_id (str): The identifier of the pre-trained model to use.
@@ -41,6 +42,7 @@ class ModelHandler:
         clear_history (self): Clears the chat history.
         preprocess_prompt (self, prompt_text): Preprocesses the prompt and adds it to the chat history.
         add_to_history (self, prompt): Adds a prompt to the chat history.
+        mediate_history_length (self): Manages the length of the chat history.
         predict (self, prompt_text): Generates text based on the prompt and chat history.
 
     """
@@ -75,7 +77,7 @@ class ModelHandler:
                     dict: The preprocessed prompt as a dictionary containing the role and content keys
                     ({'role': 'user', 'content': 'What is the capital of France?'}).
         """
-        prompt: dict ={'role': 'user', 'content': prompt_text}
+        prompt: dict[str, str] ={'role': 'user', 'content': prompt_text}
         return prompt
 
     def add_to_history(self, prompt: dict[str, str]) -> None:
