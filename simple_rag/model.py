@@ -97,10 +97,12 @@ class RAGModelHandler:
 
     def manage_history_length(self) -> None:
         """Manages the length of the chat history."""
-        while len(self.chat_history) > self.max_history_messages:
-            message: dict = self.chat_history.pop(0)
-            logger.info('Message %s deleted form the chat history.', message)
-        logger.info('Chat history truncated to %s messages.', self.max_history_messages)
+        if len(self.chat_history) > self.max_history_messages:
+            while len(self.chat_history) > self.max_history_messages:
+                message: dict = self.chat_history.pop(0)
+                logger.info('Message %s deleted form the chat history.', message)
+            logger.info('Chat history truncated to %s messages.', self.max_history_messages)
+        logger.info('Chat history at %s / %s messages.', len(self.chat_history), self.max_history_messages)
 
     def predict(self, prompt_text: str, context: list[str]) -> str:
         """
