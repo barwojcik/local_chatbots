@@ -120,5 +120,5 @@ class VectorStoreHandler:
         id_list = self.vector_store.get()['ids']
         # Delete all if the collection is not empty
         if id_list:
-            self.vector_store.delete()
+            self.vector_store.delete(id_list)
             logger.info('Vector store has been reset.')
