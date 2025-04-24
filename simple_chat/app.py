@@ -8,7 +8,6 @@ and returns the chatbot's response.
 The application is designed to be accessible through a web interface and utilizes CORS
 for cross-origin requests. It also includes basic logging for monitoring and debugging.
 """
-import logging
 from flask import Flask, render_template, request, jsonify
 from flask.wrappers import Response
 from flask_cors import CORS
@@ -22,6 +21,7 @@ app.config.from_object('config')
 cfg = app.config
 app.logger.setLevel(cfg['LOG_LEVEL'])
 
+# Initialize the model handler with the model configuration from the config file
 model: ModelHandler = ModelHandler.from_config(cfg['MODEL'])
 
 # Define the route for the index page
