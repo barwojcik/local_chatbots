@@ -14,6 +14,7 @@ output = model_handler.predict("What is the capital of France?")
 """
 import logging
 import torch
+from typing import Any
 from transformers import pipeline
 
 logging.basicConfig(level=logging.DEBUG)
@@ -34,11 +35,11 @@ class ModelHandler:
 
     Args:
         model_id (str): The identifier of the pre-trained model to use.
-        max_new_tokens (int): The maximum number of new tokens to generate.
-        max_length (int): The maximum length of the generated text.
         max_history_messages (int): The maximum number of messages to keep in the chat history.
+        model_params (dict[str, Any]): Additional parameters to pass to the model initialization function.
 
     Methods:
+        from_config (cls, config): Creates a new instance of the ModelHandler class from a configuration dictionary.
         clear_history (self): Clears the chat history.
         preprocess_prompt (self, prompt_text): Preprocesses the prompt and adds it to the chat history.
         add_to_history (self, prompt): Adds a prompt to the chat history.
@@ -46,8 +47,7 @@ class ModelHandler:
         predict (self, prompt_text): Generates text based on the prompt and chat history.
 
     """
-    def __init__(self, model_id: str, max_new_tokens: int =600, max_length: int =600,
-                 max_history_messages: int = 10) -> None:
+    def __init__(self, model_id: str, max_history_messages: int = 10, model_params: dict[str, Any] = None) -> None:
         logger.info('Initializing model %s.', model_id)
         device: str = "cuda:0" if torch.cuda.is_available() else "cpu"
         logger.info('Model will be initialized on %s.', device)
@@ -55,19 +55,41 @@ class ModelHandler:
             "text-generation",
             model=model_id,
             device=device,
-            max_new_tokens=max_new_tokens,
-            max_length=max_length,
+            **(model_params or dict()),
         )
         logger.info('Model %s has been initialized.', model_id)
         self.chat_history: list[dict[str, str]] = []
         self.max_history_messages: int = max_history_messages
+
+    @classmethod
+    def from_config(cls, model_config: dict[str, Any]) -> "ModelHandler":
+        """Creates a new instance of the ModelHandler class from a configuration dictionary.
+
+            Args:
+                model_config: Configuration dictionary containing model settings.
+                    Must contain a 'model_id' key and may contain additional parameters.
+
+            Returns:
+                ModelHandler: New instance configured with the provided settings.
+
+            Raises:
+                KeyError: If a 'model_id' key is missing from the configuration.
+        """
+        config: dict[str, Any] = model_config.copy()
+
+        if 'model_id' not in config.keys():
+            raise KeyError("Missing required 'model_id' key in configuration")
+
+        model_id: str = config.pop('model_id')
+        return cls(model_id, **config)
 
     def clear_history(self) -> None:
         """Clears the chat history."""
         self.chat_history = []
         logger.info("Chat history cleared.")
 
-    def preprocess_prompt(self, prompt_text: str) -> dict[str, str]:
+    @staticmethod
+    def preprocess_prompt(prompt_text: str) -> dict[str, str]:
         """Preprocesses the prompt and returns it as a dictionary.
 
                 Args:

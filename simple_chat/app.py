@@ -17,9 +17,12 @@ from model import ModelHandler
 # Initialize Flask app and CORS
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
-app.logger.setLevel(logging.ERROR)
 
-model: ModelHandler = ModelHandler("meta-llama/Llama-3.2-1B-Instruct")
+app.config.from_object('config')
+cfg = app.config
+app.logger.setLevel(cfg['LOG_LEVEL'])
+
+model: ModelHandler = ModelHandler.from_config(cfg['MODEL'])
 
 # Define the route for the index page
 @app.route('/', methods=['GET'])
