@@ -25,7 +25,7 @@ A powerful chatbot application that provides an interactive chat interface throu
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/barwojcik/simple-chat.git
+   git clone https://github.com/barwojcik/local_chatbots.git
    cd simple-chat
    ```
 
