@@ -34,13 +34,14 @@ class ModelHandler:
 
     Args:
         model_id (str): The identifier of the pre-trained model to use.
+        device (str): The device to use for text generation. Defaults to None, which uses CUDA if available.
         max_history_messages (int): The maximum number of messages to keep in the chat history.
         model_params (dict[str, Any]): Additional parameters to pass to the model initialization function.
 
     Methods:
         from_config (cls, config): Creates a new instance of the ModelHandler class from a configuration dictionary.
         clear_history (self): Clears the chat history.
-        preprocess_prompt (self, prompt_text): Preprocesses the prompt and adds it to the chat history.
+        preprocess_prompt (prompt_text): Preprocesses the prompt and returns it as a dictionary.
         add_to_history (self, prompt): Adds a prompt to the chat history.
         mediate_history_length (self): Manages the length of the chat history.
         predict (self, prompt_text): Generates text based on the prompt and chat history.
@@ -53,6 +54,15 @@ class ModelHandler:
             max_history_messages: int = 10,
             model_params: dict[str, Any] = None,
     ) -> None:
+        """
+        Initializes the ModelHandler with the specified model and parameters.
+
+        Args:
+            model_id (str): The identifier of the pre-trained model to use.
+            device (str): The device to use for text generation. Defaults to None, which uses CUDA if available.
+            max_history_messages (int): The maximum number of messages to keep in the chat history.
+            model_params (dict[str, Any]): Additional parameters to pass to the model initialization function.
+        """
         logger.info('Initializing model %s.', model_id)
         if device is None:
             device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -71,15 +81,15 @@ class ModelHandler:
     def from_config(cls, model_config: dict[str, Any]) -> "ModelHandler":
         """Creates a new instance of the ModelHandler class from a configuration dictionary.
 
-            Args:
-                model_config: Configuration dictionary containing model settings.
-                    Must contain a 'model_id' key and may contain additional parameters.
+        Args:
+            model_config: Configuration dictionary containing model settings.
+                Must contain a 'model_id' key and may contain additional parameters.
 
-            Returns:
-                ModelHandler: New instance configured with the provided settings.
+        Returns:
+            ModelHandler: New instance configured with the provided settings.
 
-            Raises:
-                KeyError: If a 'model_id' key is missing from the configuration.
+        Raises:
+            KeyError: If a 'model_id' key is missing from the configuration.
         """
         config: dict[str, Any] = model_config.copy()
 
@@ -98,18 +108,24 @@ class ModelHandler:
     def preprocess_prompt(prompt_text: str) -> dict[str, str]:
         """Preprocesses the prompt and returns it as a dictionary.
 
-                Args:
-                    prompt_text (str): The prompt text.
+        Args:
+            prompt_text (str): The prompt text.
 
-                Returns:
-                    dict: The preprocessed prompt as a dictionary containing the role and content keys
-                    ({'role': 'user', 'content': 'What is the capital of France?'}).
+        Returns:
+            dict: The preprocessed prompt as a dictionary containing the role and content keys
+            ({'role': 'user', 'content': 'What is the capital of France?'}).
         """
         prompt: dict[str, str] ={'role': 'user', 'content': prompt_text}
         return prompt
 
     def add_to_history(self, prompt: dict[str, str]) -> None:
-        """Adds a prompt to the chat history."""
+        """
+        Adds a prompt to the chat history.
+
+        Args:
+            prompt (dict): The prompt to be added to the chat history.
+
+        """
         self.chat_history.append(prompt)
         logger.info('%s has been added to chat history.', prompt)
 
@@ -123,13 +139,14 @@ class ModelHandler:
         logger.info('Chat history at %s / %s messages.', len(self.chat_history), self.max_history_messages)
 
     def predict(self, prompt_text: str) -> str:
-        """Generates text based on the prompt and chat history.
+        """
+        Generates text based on the prompt and chat history.
 
-                Args:
-                    prompt_text (str): The prompt text.
+        Args:
+            prompt_text (str): The prompt text.
 
-                Returns:
-                    str: The generated text.
+        Returns:
+            str: The generated text.
         """
         prompt: dict[str, str] = self.preprocess_prompt(prompt_text)
         self.add_to_history(prompt)
