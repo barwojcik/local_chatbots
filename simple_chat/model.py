@@ -17,7 +17,6 @@ import torch
 from typing import Any
 from transformers import pipeline
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 class ModelHandler:
@@ -47,9 +46,16 @@ class ModelHandler:
         predict (self, prompt_text): Generates text based on the prompt and chat history.
 
     """
-    def __init__(self, model_id: str, max_history_messages: int = 10, model_params: dict[str, Any] = None) -> None:
+    def __init__(
+            self,
+            model_id: str,
+            device: str = None,
+            max_history_messages: int = 10,
+            model_params: dict[str, Any] = None,
+    ) -> None:
         logger.info('Initializing model %s.', model_id)
-        device: str = "cuda:0" if torch.cuda.is_available() else "cpu"
+        if device is None:
+            device = "cuda:0" if torch.cuda.is_available() else "cpu"
         logger.info('Model will be initialized on %s.', device)
         self.pipe = pipeline(
             "text-generation",

@@ -10,8 +10,9 @@ TESTING = True
 LOG_LEVEL = logging.INFO
 MODEL = dict(
     model_id='meta-llama/Llama-3.2-1B-Instruct',
-    model_params=dict(
-        max_new_tokens=600,
-    ),
+    device="cuda:0",
     max_history_messages=10,
+    model_params=dict(
+            max_new_tokens=600,
+        ),
 )
