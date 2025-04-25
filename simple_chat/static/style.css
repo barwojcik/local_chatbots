@@ -4,8 +4,6 @@ body {
   color: #121717;
 }
 
-/* Dark mode *//* Add these to style.css */
-
 /* Error message styling */
 .message-box.error {
     background-color: #ffebee;
@@ -21,12 +19,8 @@ body {
 
 /* Loading animation improvements */
 .loading-animation {
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-}
-
-.loading-animation.visible {
     opacity: 1;
+    transition: opacity 0.3s ease-in-out;
 }
 
 /* Disabled button state */
@@ -157,7 +151,6 @@ body {
   width: 25px;
   color: #125ee5;
 }
-
 
 .loading-animation {
   padding-bottom: 8px;

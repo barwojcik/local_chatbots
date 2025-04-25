@@ -26,7 +26,7 @@ A powerful chatbot application that provides an interactive chat interface throu
 1. Clone the repository:
    ```bash
    git clone https://github.com/barwojcik/local_chatbots.git
-   cd simple-chat
+   cd simple_chat
    ```
 
 2. Create and activate virtual environment:
@@ -63,9 +63,12 @@ A powerful chatbot application that provides an interactive chat interface throu
 1. Start the application:
    ```bash
    python app.py
-   # or
-   flask --app app run
-   # or run docker container
    ```
+   or
+   ```bash
+   flask --app app.py run
+   ```
+   alternatively run docker container.
+
 
 2. Open your web browser and navigate to `http://localhost:5000`
