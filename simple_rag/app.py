@@ -19,10 +19,13 @@ from vector_store import VectorStoreHandler
 # Initialize Flask app and CORS
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
-app.logger.setLevel(logging.ERROR)
 
-model: RAGModelHandler = RAGModelHandler("meta-llama/Llama-3.2-1B-Instruct")
-vector_store: VectorStoreHandler = VectorStoreHandler()
+app.config.from_object('config')
+cfg = app.config
+app.logger.setLevel(cfg['LOG_LEVEL'])
+
+model: RAGModelHandler = RAGModelHandler.from_config(cfg['MODEL'])
+vector_store: VectorStoreHandler = VectorStoreHandler.from_config(cfg['VECTOR_STORE'])
 
 # Define the route for the index page
 @app.route('/', methods=['GET'])
