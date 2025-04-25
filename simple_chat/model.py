@@ -41,9 +41,9 @@ class ModelHandler:
     Methods:
         from_config (cls, config): Creates a new instance of the ModelHandler class from a configuration dictionary.
         clear_history (self): Clears the chat history.
-        preprocess_prompt (prompt_text): Preprocesses the prompt and returns it as a dictionary.
-        add_to_history (self, prompt): Adds a prompt to the chat history.
-        mediate_history_length (self): Manages the length of the chat history.
+        _preprocess_prompt (prompt_text): Preprocesses the prompt and returns it as a dictionary.
+        _add_to_history (self, prompt): Adds a prompt to the chat history.
+        _menage_history_length (self): Manages the length of the chat history.
         predict (self, prompt_text): Generates text based on the prompt and chat history.
 
     """
@@ -105,7 +105,7 @@ class ModelHandler:
         logger.info("Chat history cleared.")
 
     @staticmethod
-    def preprocess_prompt(prompt_text: str) -> dict[str, str]:
+    def _preprocess_prompt(prompt_text: str) -> dict[str, str]:
         """Preprocesses the prompt and returns it as a dictionary.
 
         Args:
@@ -118,7 +118,7 @@ class ModelHandler:
         prompt: dict[str, str] ={'role': 'user', 'content': prompt_text}
         return prompt
 
-    def add_to_history(self, prompt: dict[str, str]) -> None:
+    def _add_to_history(self, prompt: dict[str, str]) -> None:
         """
         Adds a prompt to the chat history.
 
@@ -129,7 +129,7 @@ class ModelHandler:
         self.chat_history.append(prompt)
         logger.info('%s has been added to chat history.', prompt)
 
-    def manage_history_length(self) -> None:
+    def _manage_history_length(self) -> None:
         """Manages the length of the chat history."""
         if len(self.chat_history) > self.max_history_messages:
             while len(self.chat_history) > self.max_history_messages:
@@ -148,9 +148,9 @@ class ModelHandler:
         Returns:
             str: The generated text.
         """
-        prompt: dict[str, str] = self.preprocess_prompt(prompt_text)
-        self.add_to_history(prompt)
-        self.manage_history_length()
+        prompt: dict[str, str] = self._preprocess_prompt(prompt_text)
+        self._add_to_history(prompt)
+        self._manage_history_length()
         try:
             output: dict[str, str] = self.pipe(self.chat_history)[0]['generated_text'][-1]
         except Exception as e:
