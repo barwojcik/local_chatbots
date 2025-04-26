@@ -5,14 +5,14 @@ For model parameters configuration, see: https://huggingface.co/docs/transformer
 """
 import logging
 
-DEBUG = True
-TESTING = True
+DEBUG = False
+TESTING = False
 LOG_LEVEL = logging.INFO
 MODEL = dict(
     model_id='meta-llama/Llama-3.2-1B-Instruct',
     device="cuda:0",
     max_history_messages=10,
     model_params=dict(
-            max_new_tokens=600,
-        ),
+        max_new_tokens=600,
+    ),
 )

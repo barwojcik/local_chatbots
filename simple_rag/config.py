@@ -9,8 +9,8 @@ For query parameters configuration, see: https://huggingface.co/docs/vectorstore
 """
 import logging
 
-DEBUG = True
-TESTING = True
+DEBUG = False
+TESTING = False
 LOG_LEVEL = logging.INFO
 MODEL = dict(
     model_id='meta-llama/Llama-3.2-1B-Instruct',
