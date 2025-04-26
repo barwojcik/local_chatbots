@@ -18,6 +18,7 @@ A powerful chatbot application that provides an interactive chat interface throu
 - Python 3.10.12
 - virtualenv (Python package manager)
 - Docker (optional, for containerized deployment)
+- Hugging Face API token for LLM access
 
 ## Installation
 
@@ -35,14 +36,9 @@ A powerful chatbot application that provides an interactive chat interface throu
    source venv/bin/activate  # Linux/Mac
    ```
    
-3. Install PyTorch
+3. Install PyTorch and dependencies:
    ```bash
    pip install torch
-   ```
-
-
-4. Install dependencies:
-   ```bash
    pip install -r requirements.txt
    ```
 
@@ -55,7 +51,10 @@ A powerful chatbot application that provides an interactive chat interface throu
 
 2. Run the container:
    ```bash
-   docker run --gpus all -e HF_TOKEN=<your_token> -p 5000:5000 simple-chat
+   docker run --gpus all \
+   -e HF_TOKEN=<your_token> \
+   -p 5000:5000 \
+   simple-chat
    ```
 
 ## Usage
@@ -72,3 +71,13 @@ A powerful chatbot application that provides an interactive chat interface throu
 
 
 2. Open your web browser and navigate to `http://localhost:5000`
+
+3. Start chatting
+
+## File Structure
+
+- `app.py`: Main Flask application
+- `config.py`: Configuration settings
+- `model.py`: LLM integration
+- `static/`: Static web assets
+- `templates/`: HTML templates
