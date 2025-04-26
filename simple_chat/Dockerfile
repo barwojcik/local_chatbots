@@ -27,4 +27,4 @@ COPY . .
 EXPOSE 5000
 
 # Command to run the application
-CMD ["python3", "app.py"]
+CMD ["flask", "--app", "app.py", "run", "--host=0.0.0.0"]
