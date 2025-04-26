@@ -43,8 +43,10 @@ class VectorStoreHandler:
     Args:
         embeddings_model (str, optional): The identifier of the Hugging Face embeddings model.
             Defaults to "sentence-transformers/all-MiniLM-L6-v2".
-        chunk_size (int, optional): The size of text chunks. Defaults to 1024.
-        chunk_overlap (int, optional): The overlap between chunks. Defaults to 64.
+        model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embedding model.
+                If not provided, defaults to {"device": "cuda:0"} if CUDA is available, otherwise to {"device": "cpu"}.
+        splitter_params (dict[str, Any], optional): Additional parameters for the text splitter.
+        query_params (dict[str, Any], optional): Additional parameters for the similarity search query.
 
     Methods:
         clean_chunks(chunks): Removes newlines from text chunks.
@@ -100,7 +102,7 @@ class VectorStoreHandler:
         return cls(**config)
 
     @staticmethod
-    def clean_chunks(chunks):
+    def _clean_chunks(chunks):
         """Removes newlines from text chunks."""
         for chunk in chunks:
             chunk.page_content = chunk.page_content.replace('\n', ' ')
@@ -119,7 +121,7 @@ class VectorStoreHandler:
 
         text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(**self.splitter_params)
         chunks: list[Document] = loader.load_and_split(text_splitter)
-        self.clean_chunks(chunks)
+        self._clean_chunks(chunks)
 
         self.vector_store.add_documents(chunks)
         logger.info('Vector store has been populated from %s.', document_path)
@@ -132,7 +134,7 @@ class VectorStoreHandler:
             query (str): The search query.
 
         Returns:
-            list[str]: A list of relevant text chunks from the stored documents.
+            context (list[str]): A list of relevant text chunks from the stored documents.
         """
         documents: list[Document] = self.vector_store.similarity_search(query, **self.query_params)
         context: list[str] = [doc.page_content for doc in documents]

@@ -41,9 +41,9 @@ class RAGModelHandler:
     Methods:
         from_config (cls, config): Creates a new instance of the RAGModelHandler class from a configuration dictionary.
         clear_history (self): Clears the chat history.
-        preprocess_prompt (prompt_text, context): Preprocesses the prompt and adds it to the chat history.
-        add_to_history (self, prompt): Adds a prompt to the chat history.
-        menage_history_length (self): Manages the length of the chat history.
+        _preprocess_prompt (prompt_text, context): Preprocesses the prompt and adds it to the chat history.
+        _add_to_history (self, prompt): Adds a prompt to the chat history.
+        _menage_history_length (self): Manages the length of the chat history.
         predict (self, prompt_text, context): Generates text based on the prompt, context, and chat history.
     """
 
@@ -106,7 +106,7 @@ class RAGModelHandler:
         logger.info("Chat history cleared.")
 
     @staticmethod
-    def preprocess_prompt(prompt_text: str, context: list[str]) -> dict[str, str]:
+    def _preprocess_prompt(prompt_text: str, context: list[str]) -> dict[str, str]:
         """
         Preprocesses the prompt by incorporating context and adding it to the chat history.
 
@@ -115,7 +115,8 @@ class RAGModelHandler:
             context (list[str]): A list of strings representing the external context.
 
         Returns:
-            str: The preprocessed prompt as a dictionary containing the role and content keys
+            prompt (dict[str, str]): The preprocessed prompt with injected context in
+                the form of a dictionary containing the role and content keys
         """
         prompt: dict[str, str] ={
             'role': 'user',
@@ -124,12 +125,12 @@ class RAGModelHandler:
         }
         return prompt
 
-    def add_to_history(self, prompt: dict[str, str]) -> None:
+    def _add_to_history(self, prompt: dict[str, str]) -> None:
         """Adds a prompt to the chat history."""
         self.chat_history.append(prompt)
         logger.info('%s has been added to chat history.', prompt)
 
-    def manage_history_length(self) -> None:
+    def _manage_history_length(self) -> None:
         """Manages the length of the chat history."""
         if len(self.chat_history) > self.max_history_messages:
             while len(self.chat_history) > self.max_history_messages:
@@ -149,9 +150,9 @@ class RAGModelHandler:
         Returns:
             str: The generated text response.
         """
-        prompt: dict[str, str] = self.preprocess_prompt(prompt_text, context)
-        self.add_to_history(prompt)
-        self.manage_history_length()
+        prompt: dict[str, str] = self._preprocess_prompt(prompt_text, context)
+        self._add_to_history(prompt)
+        self._manage_history_length()
         try:
             output: dict[str, str] = self.pipe(self.chat_history)[0]['generated_text'][-1]
         except Exception as e:

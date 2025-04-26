@@ -8,13 +8,14 @@ and returns the chatbot's response.
 The application is designed to be accessible through a web interface and utilizes CORS
 for cross-origin requests. It also includes basic logging for monitoring and debugging.
 """
-import logging
 from flask import Flask, render_template, request, jsonify
 from flask.wrappers import Response
 from flask_cors import CORS
+from werkzeug.datastructures.file_storage import FileStorage
 
 from model import RAGModelHandler
 from vector_store import VectorStoreHandler
+from file_handler import FileHandler
 
 # Initialize Flask app and CORS
 app = Flask(__name__)
@@ -26,6 +27,7 @@ app.logger.setLevel(cfg['LOG_LEVEL'])
 
 model: RAGModelHandler = RAGModelHandler.from_config(cfg['MODEL'])
 vector_store: VectorStoreHandler = VectorStoreHandler.from_config(cfg['VECTOR_STORE'])
+file_handler: FileHandler = FileHandler.from_config(cfg['FILES'])
 
 # Define the route for the index page
 @app.route('/', methods=['GET'])
@@ -74,18 +76,21 @@ def process_document_route() -> tuple[Response, int]:
                                "again. If the problem persists, try using a different file"
             }), 400
 
-        file = request.files['file']
-
-        file_path: str = file.filename
-        file.save(file_path)
-
+        file: FileStorage = request.files['file']
+        file_path = file_handler.save_file(file)
         vector_store.process_document(file_path)
+        file_handler.cleanup_file(file_path)
 
         # Return a success message as JSON
         return jsonify({
             "botResponse": "Thank you for providing your PDF document. I have analyzed it, so now you can ask me any "
                            "questions regarding it!"
         }), 200
+    except ValueError as e:
+        app.logger.error("Error processing document: %s", e)
+        return jsonify({
+            "botResponse": f"An error occurred while processing your document: {e}"
+        }), 400
     except Exception as e:
         app.logger.error("Error processing document: %s", e)
         return jsonify({
