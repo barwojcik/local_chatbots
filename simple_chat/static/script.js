@@ -23,13 +23,13 @@ const showBotLoadingAnimation = async () => {
     if (STATE.isProcessing) return;
     STATE.isProcessing = true;
     await sleep(200);
-    $('.loading-animation').last().fadeIn();
+    $('.loading-animation').last().fadeIn(100);
     $('#send-button').prop('disabled', true);
 };
 
 const hideBotLoadingAnimation = () => {
     STATE.isProcessing = false;
-    $('.loading-animation').last().fadeOut();
+    $('.loading-animation').last().hide();
     if (!STATE.isFirstMessage) {
         $('#send-button').prop('disabled', false);
     }
@@ -94,6 +94,8 @@ const resetBotChatHistory = async () => {
 
 // Message handling functions
 const showErrorMessage = (message) => {
+    hideBotLoadingAnimation();
+
     $('#message-list').append(`
         <div class="message-line error">
             <div class="message-box error${!STATE.lightMode ? ' dark' : ''}">
