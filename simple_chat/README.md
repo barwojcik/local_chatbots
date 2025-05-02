@@ -46,15 +46,16 @@ A powerful chatbot application that provides an interactive chat interface throu
 
 1. Build the Docker image:
    ```bash
-   docker build -t simple-chat
+   docker build -t simple-chat .
    ```
 
 2. Run the container:
    ```bash
    docker run --gpus all \
-   -e HF_TOKEN=<your_token> \
-   -p 5000:5000 \
-   simple-chat
+       -e HF_TOKEN=<your_token> \
+       -p 5000:5000 \
+       -n simple-chat \
+       simple-chat
    ```
 
 ## Usage

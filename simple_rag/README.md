@@ -57,7 +57,8 @@ A powerful RAG-based chatbot application that enhances Large Language Model (LLM
    docker run --gpus all \
        -e HF_TOKEN=<your_token> \
        -v /path/to/documents:/app/uploads \
-       -p 5000:5000 \
+       -p 5000:5000 \ 
+       -n simple-rag \
        simple-rag
    ```
 
