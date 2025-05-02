@@ -1,17 +1,11 @@
-/* Light mode */
+/* Dark mode (default) */
 body {
-  background-color: #d6ddec;
-  color: #121717;
+  background-color: #121717;
+  color: #c9c9c9;
 }
 
 /* Error message styling */
 .message-box.error {
-    background-color: #ffebee;
-    color: #c62828;
-    border: 1px solid #ffcdd2;
-}
-
-.message-box.error.dark {
     background-color: #4a0f0f;
     color: #ef9a9a;
     border: 1px solid #c62828;
@@ -29,30 +23,26 @@ body {
     cursor: not-allowed;
 }
 
-/* Input field in dark mode */
-.dark-mode .form-control {
+/* Input field styles */
+.form-control {
     background-color: #263443;
     color: #c9c9c9;
     border-color: #4a4a4a;
 }
 
-.dark-mode .form-control::placeholder {
+.form-control::placeholder {
     color: #808080;
-}
-.dark-mode {
-  background-color: #121717;
-  color: #c9c9c9;
 }
 
 #chat-window {
   position: relative;
-  height: 70vh;
+  height: 80vh;
   overflow: auto;
 }
 
 .message-line {
   padding-bottom: 8px;
-  width: 70%;
+  width: 90%;
   word-break: break-word;
   display: flex;
 }
@@ -62,7 +52,7 @@ body {
   border-radius: 15px;
   display: inline-block;
   position: relative;
-  background-color: #efefef;
+  background-color: #263443;
   min-width: 26px;
   border-top-left-radius: 0;
   word-wrap: break-word;
@@ -76,20 +66,12 @@ body {
 
 .message-box.my-text {
   transform: rotateY(180deg);
-  background-color: #e7f9d8;
+  background-color: #0f4c9e;
   margin-left:150px;
 }
 
 .me {
   transform: scale(-1, 1);
-}
-
-.message-box.my-text.dark {
-  background-color: #0f4c9e;
-}
-
-.message-box.dark {
-  background-color: #263443;
 }
 
 /* Input container */
@@ -156,7 +138,7 @@ body {
   padding-bottom: 8px;
   word-break: break-word;
   display: none;
-  width: 70%;
+  width: 90%;
 }
 
 .loading-animation.my-loading {
@@ -168,7 +150,7 @@ body {
   padding: 12px;
   border-radius: 15px;
   position: relative;
-  background-color: #efefef;
+  background-color: #263443;
   min-width: 26px;
   border-top-left-radius: 0;
   display: flex;
@@ -179,7 +161,7 @@ body {
 
 .loading-dots.my-loading {
   transform: rotateY(180deg);
-  background-color: #e7f9d8;
+  background-color: #0e4d9e;
   float: right;
 }
 
@@ -189,18 +171,6 @@ body {
   margin: 0 2px;
   border-radius: 50%;
   animation: bounce 1.5s ease-in-out infinite;
-  background: #5a5a5a;
-}
-
-.loading-dots.my-loading.dark {
-  background-color: #0e4d9e;
-}
-
-.dark {
-  background-color: #263443;
-}
-
-.dark-dot {
   background: #c9c9c9;
 }
 
@@ -225,4 +195,150 @@ body {
   20% {
     transform: translateY(-10px);
   }
+}
+
+/* Markdown styling */
+.markdown-content {
+  line-height: 1.5;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+}
+
+.markdown-content h1 { font-size: 1.6em; }
+.markdown-content h2 { font-size: 1.4em; }
+.markdown-content h3 { font-size: 1.2em; }
+.markdown-content h4 { font-size: 1.1em; }
+
+.markdown-content p {
+  margin-bottom: 0.75em;
+}
+
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content ul, 
+.markdown-content ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.markdown-content li {
+  margin-bottom: 0.25em;
+}
+
+.markdown-content code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  background-color: #2a2d32;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  color: #e6e6e6;
+}
+
+.markdown-content pre {
+  background-color: #1e2228;
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-bottom: 1em;
+  border: 1px solid #343a40;
+  color: #f8f9fa;
+}
+
+.markdown-content pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  display: block;
+  line-height: 1.5;
+  white-space: pre;
+  font-size: 0.875em;
+  tab-size: 2;
+  color: #f8f9fa;
+}
+
+/* Override highlight.js default styling */
+.hljs {
+  background-color: #1e2228;
+  color: #f8f9fa;
+}
+
+/* Syntax highlighting for code blocks */
+.markdown-content .hljs-keyword {
+  color: #ff7b72;
+}
+
+.markdown-content .hljs-string {
+  color: #a5d6ff;
+}
+
+.markdown-content .hljs-comment {
+  color: #8b949e;
+}
+
+.markdown-content .hljs-function {
+  color: #d2a8ff;
+}
+
+.markdown-content .hljs-number {
+  color: #79c0ff;
+}
+
+.markdown-content .hljs-class {
+  color: #7ee787;
+}
+
+.markdown-content .hljs-tag {
+  color: #7ee787;
+}
+
+.markdown-content .hljs-attr {
+  color: #d2a8ff;
+}
+
+.markdown-content .hljs-title {
+  color: #d2a8ff;
+}
+
+.markdown-content .hljs-literal {
+  color: #79c0ff;
+}
+
+.markdown-content blockquote {
+  border-left: 3px solid #555;
+  padding-left: 10px;
+  margin-left: 0;
+  color: #aaa;
+}
+
+.markdown-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 0.75em;
+}
+
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid #444;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.markdown-content a {
+  color: #58a6ff;
+  text-decoration: none;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
 }

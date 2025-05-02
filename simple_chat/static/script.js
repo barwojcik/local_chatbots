@@ -1,6 +1,5 @@
 // Constants and state management
 const STATE = {
-    lightMode: true,
     isFirstMessage: true,
     responses: [],
     baseUrl: window.location.origin,
@@ -98,7 +97,7 @@ const showErrorMessage = (message) => {
 
     $('#message-list').append(`
         <div class="message-line error">
-            <div class="message-box error${!STATE.lightMode ? ' dark' : ''}">
+            <div class="message-box error">
                 ${message}
             </div>
         </div>
@@ -110,7 +109,7 @@ const populateUserMessage = (userMessage) => {
     $('#message-input').val('');
     $('#message-list').append(`
         <div class="message-line my-text">
-            <div class="message-box my-text${!STATE.lightMode ? ' dark' : ''}">
+            <div class="message-box my-text">
                 <div class="me">${userMessage}</div>
             </div>
         </div>
@@ -124,13 +123,57 @@ const renderBotResponse = (response) => {
     STATE.responses.push(response);
     hideBotLoadingAnimation();
 
+    // Parse markdown if the marked library is available
+    let formattedResponse;
+    if (typeof marked !== 'undefined') {
+        // Set marked options to safely handle user-generated content
+        marked.setOptions({
+            breaks: true,        // Add line breaks when \n is encountered
+            gfm: true,           // Use GitHub Flavored Markdown
+            headerIds: false,    // Don't add IDs to headers (for security)
+            sanitize: false,     // Required for compatibility, we'll sanitize elsewhere
+            highlight: function(code, lang) {
+                // Apply syntax highlighting if highlight.js is available
+                if (typeof hljs !== 'undefined') {
+                    if (lang && hljs.getLanguage(lang)) {
+                        try {
+                            return hljs.highlight(code, { language: lang }).value;
+                        } catch (err) {
+                            console.error('Highlight.js error:', err);
+                        }
+                    }
+                    try {
+                        return hljs.highlightAuto(code).value;
+                    } catch (err) {
+                        console.error('Highlight.js auto-detection error:', err);
+                    }
+                }
+                return code; // Return unmodified code if highlighting fails
+            }
+        });
+        
+        formattedResponse = marked.parse(response.botResponse.trim());
+    } else {
+        formattedResponse = response.botResponse.trim();
+    }
+
     $('#message-list').append(`
         <div class="message-line">
-            <div class="message-box${!STATE.lightMode ? ' dark' : ''}">
-                ${response.botResponse.trim()}
+            <div class="message-box markdown-content">
+                ${formattedResponse}
             </div>
         </div>
     `);
+    
+    // Apply additional highlighting to any code blocks that might have been missed
+    if (typeof hljs !== 'undefined') {
+        $('pre code').each(function(i, block) {
+            if (!block.classList.contains('hljs')) {
+                hljs.highlightElement(block);
+            }
+        });
+    }
+    
     scrollToBottom();
 };
 
@@ -181,14 +224,6 @@ $(document).ready(() => {
         STATE.isFirstMessage = true;
         await resetBotChatHistory();
         await populateBotResponse();
-    });
-
-    $('#light-dark-mode-switch').on('change', () => {
-        $('body').toggleClass('dark-mode');
-        $('.message-box').toggleClass('dark');
-        $('.loading-dots').toggleClass('dark');
-        $('.dot').toggleClass('dark-dot');
-        STATE.lightMode = !STATE.lightMode;
     });
 
     // Start the chat
