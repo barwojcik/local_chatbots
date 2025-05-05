@@ -20,6 +20,7 @@ from ollama import Client, ListResponse, ChatResponse
 
 logger = logging.getLogger(__name__)
 
+
 class OllamaModelHandler:
     """
     Handles interactions with the Ollama service.
@@ -172,7 +173,7 @@ class OllamaModelHandler:
             dict: The preprocessed prompt as a dictionary containing the role and content keys
             ({'role': 'user', 'content': 'What is the capital of France?'}).
         """
-        prompt: dict[str, str] ={'role': 'user', 'content': prompt_text}
+        prompt: dict[str, str] = {'role': 'user', 'content': prompt_text}
         return prompt
 
     def _add_to_history(self, prompt: dict[str, str]) -> None:

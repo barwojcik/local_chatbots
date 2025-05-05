@@ -8,6 +8,7 @@ and returns the chatbot's response.
 The application is designed to be accessible through a web interface and utilizes CORS
 for cross-origin requests. It also includes basic logging for monitoring and debugging.
 """
+
 from flask import Flask, render_template, request, jsonify
 from flask.wrappers import Response
 from flask_cors import CORS
@@ -24,11 +25,13 @@ app.logger.setLevel(cfg['LOG_LEVEL'])
 # Initialize the model handler with the model configuration from the config file
 model: OllamaModelHandler = OllamaModelHandler.from_config(cfg['MODEL'])
 
+
 # Define the route for the index page
 @app.route('/', methods=['GET'])
 def index() -> str:
     """Render the index page for the chatbot."""
     return render_template('index.html')  # Render the index.html template
+
 
 # Define the route for processing messages
 @app.route('/process-message', methods=['POST'])
@@ -56,6 +59,7 @@ def process_message_route() -> tuple[Response, int]:
         app.logger.error('Error processing message: %s', e)
         return jsonify({'error': 'Failed to process message.'}), 500
 
+
 # Define the route for resetting model chat history
 @app.route('/reset-chat-history', methods=['GET'])
 def reset_chat_history_route() -> tuple[Response, int]:
@@ -74,10 +78,12 @@ def reset_chat_history_route() -> tuple[Response, int]:
             "message": f"Error resetting chat history: {e}",
         }), 500
 
+
 @app.route('/model', methods=['GET', 'POST'])
 def process_model_route() -> tuple[Response, int]:
     """
     Processes a model based on the HTTP request method.
+
 
     Returns:
         tuple[Response, int]: A tuple containing a `Response` object and an integer indicating
@@ -87,6 +93,7 @@ def process_model_route() -> tuple[Response, int]:
         return process_get_model()
 
     return process_set_model()
+
 
 def process_get_model() -> tuple[Response, int]:
     """
@@ -110,6 +117,7 @@ def process_get_model() -> tuple[Response, int]:
         app.logger.error('Error processing message: %s', e)
         return jsonify({'error': 'Internal server error'}), 500
 
+
 def process_set_model() -> tuple[Response, int]:
     """
     Sets the model name based on the input JSON request and updates the
@@ -131,6 +139,7 @@ def process_set_model() -> tuple[Response, int]:
     except Exception as e:
         app.logger.error('Error processing message: %s', e)
         return jsonify({'error': 'Internal server error'}), 500
+
 
 # Run the Flask app
 if __name__ == "__main__":

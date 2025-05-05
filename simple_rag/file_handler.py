@@ -13,7 +13,7 @@ file_path = file_handler.save_file(file)
 file_handler.cleanup_file(file_path)
 """
 import os
-from typing import Optional, Any
+from typing import Any
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures.file_storage import FileStorage
 import logging
