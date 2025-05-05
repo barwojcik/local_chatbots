@@ -68,7 +68,7 @@ A powerful chatbot application that provides an interactive chat interface throu
    ```bash
    flask --app app.py run
    ```
-   alternatively run docker container.
+   alternatively, run docker container.
 
 
 2. Open your web browser and navigate to `http://localhost:5000`

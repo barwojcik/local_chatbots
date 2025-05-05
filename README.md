@@ -1,6 +1,6 @@
 # Local LLM Chatbots
 
-A collection of Flask-based chatbot applications powered by Large Language Models (LLMs) that run locally on your machine.
+A collection of Flask-based applications powered by Large Language Models (LLMs) that run locally on your machine.
 
 ## Available Applications
 
@@ -17,7 +17,7 @@ A collection of Flask-based chatbot applications powered by Large Language Model
 - Supports local document processing
 
 ## Requirements
-- Python 3.8+
+- Python 3.10+
 - `transformers`
 - `langchain`
 - `flask`
