@@ -1,5 +1,5 @@
 """
-Simple chatbot with LLM using Flask.
+Ollama chatbot with LLM using Flask.
 
 This module defines a simple chatbot application using a Large Language Model (LLM)
 and the Flask framework. It handles user messages, sends them to the LLM for processing,
@@ -73,6 +73,64 @@ def reset_chat_history_route() -> tuple[Response, int]:
             "status": "error",
             "message": f"Error resetting chat history: {e}",
         }), 500
+
+@app.route('/model', methods=['GET', 'POST'])
+def process_model_route() -> tuple[Response, int]:
+    """
+    Processes a model based on the HTTP request method.
+
+    Returns:
+        tuple[Response, int]: A tuple containing a `Response` object and an integer indicating
+            the HTTP status code.
+    """
+    if request.method == 'GET':
+        return process_get_model()
+
+    return process_set_model()
+
+def process_get_model() -> tuple[Response, int]:
+    """
+    Processes a request to retrieve information about the available models and
+    the currently active model being used.
+
+    Returns:
+        tuple[Response, int]: A tuple containing a JSON response and the corresponding HTTP status
+            code. The successful response includes the available model names and the
+            actively selected model.
+    """
+    try:
+        return jsonify(
+            {
+                "success": True,
+                "available_models": model.get_available_model_names(),
+                "current_model": model.get_current_model_name(),
+            }
+        ), 200
+    except Exception as e:
+        app.logger.error('Error processing message: %s', e)
+        return jsonify({'error': 'Internal server error'}), 500
+
+def process_set_model() -> tuple[Response, int]:
+    """
+    Sets the model name based on the input JSON request and updates the
+    application's state accordingly.
+
+    Returns:
+        tuple[Response, int]: A tuple containing a ``Response`` object and an integer status code.
+    """
+    try:
+        model_name = request.json['model']
+        app.logger.info('Setting model to %s', model_name)
+        if model.set_model(model_name):
+            return jsonify({"success": True}), 200
+        else:
+            return jsonify({"success": False, "error": "Invalid model name"}), 400
+    except KeyError as e:
+        app.logger.error('Missing key in request data: %s', e)
+        return jsonify({'error': f'Missing required field: {str(e)}'}), 400
+    except Exception as e:
+        app.logger.error('Error processing message: %s', e)
+        return jsonify({'error': 'Internal server error'}), 500
 
 # Run the Flask app
 if __name__ == "__main__":

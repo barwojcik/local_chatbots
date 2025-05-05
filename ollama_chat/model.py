@@ -1,8 +1,8 @@
 """
-This module provides a `ModelHandler` class for using pre-trained text generation models.
+This module provides a `OllamaModelHandler` class for using Ollama pre-trained text generation models.
 
-The `ModelHandler` class simplifies the process of loading, initializing, and using
-a text generation model from the `transformers` library. It provides methods
+The `OllamaModelHandler` class simplifies the process of loading, initializing, and using
+a text generation model from the `ollama` library. It provides methods
 for preprocessing prompts, generating text, and maintaining a chat history.
 
 The module also includes basic logging functionality to provide information about
@@ -12,10 +12,9 @@ Example usage:
 model_handler = ModelHandler("meta-llama/Llama-3.2-1B-Instruct")
 output = model_handler.predict("What is the capital of France?")
 """
+
 import logging
-import torch
-from typing import Any, Callable, Optional
-from transformers import pipeline
+from typing import Any, Optional
 from collections import deque
 from ollama import Client, ListResponse, ChatResponse
 
@@ -26,10 +25,10 @@ class OllamaModelHandler:
     Handles interactions with the Ollama service.
 
     Args:
-        model_name (str): The identifier of the pre-trained model to use.
-        ollama_host (str): The host of the Ollama service.
-        chat_kwargs (dict[str, Any]): Additional keyword arguments passed to the chat method.
-        max_history_messages (int): The maximum number of messages to keep in the chat history.
+            model_name (str): The identifier of the pre-trained model to use.
+            ollama_host (str): The host of the Ollama service.
+            chat_kwargs (dict[str, Any]): Additional keyword arguments passed to the chat method.
+            max_history_messages (int): The maximum number of messages to keep in the chat history.
     """
 
     DEFAULT_MODEL: str = 'llama3.2:1b'
@@ -45,10 +44,10 @@ class OllamaModelHandler:
         Initializes the ModelHandler with the specified model and parameters.
 
         Args:
-            model_id (str): The identifier of the pre-trained model to use.
-            device (str): The device to use for text generation. Defaults to None, which uses CUDA if available.
+            model_name (str): The identifier of the pre-trained model to use.
+            ollama_host (str): The host of the Ollama service.
+            chat_kwargs (dict[str, Any]): Additional keyword arguments passed to the chat method.
             max_history_messages (int): The maximum number of messages to keep in the chat history.
-            model_params (dict[str, Any]): Additional parameters to pass to the model initialization function.
         """
         self._model_name: str = model_name
         self._is_model_initialized: bool = False
@@ -61,11 +60,10 @@ class OllamaModelHandler:
 
     @classmethod
     def from_config(cls, model_config: dict[str, Any]) -> "OllamaModelHandler":
-        """Creates a new instance of the ModelHandler class from a configuration dictionary.
+        """Creates a new instance of the OllamaModelHandler class from a configuration dictionary.
 
         Args:
             model_config: Configuration dictionary containing model settings.
-                Must contain a 'model_id' key and may contain additional parameters.
 
         Returns:
             OllamaModelHandler: New instance configured with the provided settings.
@@ -164,7 +162,8 @@ class OllamaModelHandler:
 
     @staticmethod
     def _preprocess_prompt(prompt_text: str) -> dict[str, str]:
-        """Preprocesses the prompt and returns it as a dictionary.
+        """
+        Preprocesses the prompt and returns it as a dictionary.
 
         Args:
             prompt_text (str): The prompt text.
