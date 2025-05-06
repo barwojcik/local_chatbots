@@ -7,7 +7,7 @@ A powerful chatbot application that provides an interactive chat interface throu
 
 ## Features
 
-- Real-time chat interface
+- Real-time chat interface with model selection
 - LLM-powered responses
 - RESTful API support
 - Docker support for easy deployment
