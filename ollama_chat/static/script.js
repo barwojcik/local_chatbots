@@ -6,6 +6,12 @@ const STATE = {
     isProcessing: false
 };
 
+// Object to store model data from server
+let modelData = {
+    availableModels: ['Add a model'],
+    currentModel: null
+};
+
 // Utility functions
 const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
 
@@ -44,7 +50,7 @@ const scrollToBottom = () => {
 // API interaction functions
 const processUserMessage = async (userMessage) => {
     try {
-        const response = await fetch(`${STATE.baseUrl}/process-message`, {
+        const response = await fetch(`${STATE.baseUrl}/messages`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -203,6 +209,78 @@ const populateBotResponse = async (userMessage) => {
     renderBotResponse(response);
 };
 
+
+// Function to fetch model data from server
+async function fetchModelData() {
+    try {
+        const response = await fetch('/model');
+        if (!response.ok) {
+            throw new Error(`Server responded with status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        modelData.availableModels = data.available_models || [];
+        modelData.currentModel = data.current_model || '';
+
+        // Update model selection dropdown
+        updateModelSelector();
+    } catch (error) {
+        console.error('Error fetching model data:', error);
+    }
+}
+
+// Function to update the model selector dropdown
+function updateModelSelector() {
+    const modelSelect = document.getElementById('modelSelect');
+
+    // Clear existing options
+    modelSelect.innerHTML = '';
+
+    // Add options for each available model
+    modelData.availableModels.forEach(model => {
+        const option = document.createElement('option');
+        option.value = model;
+        option.textContent = model;
+        if (model === modelData.currentModel) {
+            option.selected = true;
+        }
+        modelSelect.appendChild(option);
+    });
+}
+
+// Function to set the current model
+async function setCurrentModel(modelName) {
+    try {
+        const response = await fetch('/model', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: modelName
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server responded with status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+            modelData.currentModel = modelName;
+            console.log(`Model successfully set to: ${modelName}`);
+                return true; // Return success status
+            } else {
+                const errorMsg = data.error || 'Unknown error';
+                console.error(`Failed to set model: ${errorMsg}`);
+                throw new Error(errorMsg);
+            }
+        } catch (error) {
+            console.error('Error setting model:', error);
+            throw error; // Re-throw to allow caller to handle
+    }
+}
+
 // Document ready handler
 $(document).ready(() => {
     // Initial setup
@@ -226,6 +304,15 @@ $(document).ready(() => {
         await populateBotResponse();
     });
 
+    // Add event listener for model selection changes
+    document.getElementById('modelSelect').addEventListener('change', function() {
+        const selectedModel = this.value;
+        if (selectedModel && selectedModel !== modelData.currentModel) {
+            setCurrentModel(selectedModel);
+        }
+    });
+
     // Start the chat
+    fetchModelData();
     populateBotResponse();
 });
