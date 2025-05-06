@@ -34,8 +34,30 @@ def index() -> str:
 
 
 # Define the route for processing messages
-@app.route('/process-message', methods=['POST'])
-def process_message_route() -> tuple[Response, int]:
+@app.route('/messages', methods=['GET', 'POST'])
+def messages_route() -> tuple[Response, int]:
+    if request.method == 'GET':
+        return get_messages()
+    return process_message()
+
+
+def get_messages() -> tuple[Response, int]:
+    """Get the chat history."""
+    try:
+        message_history: list[dict[str, str]] = model.get_history()
+        app.logger.info("Bot chat history acquired.")
+        return jsonify({
+            "status": "success",
+            "messages": message_history,
+        }), 200
+    except Exception as e:
+        app.logger.error("Error when getting chat history: %s", e)
+        return jsonify({
+            "status": "error",
+        }), 500
+
+
+def process_message() -> tuple[Response, int]:
     """Process user messages and return chatbot responses."""
     try:
         # Extract the user's message from the request
@@ -114,7 +136,7 @@ def process_get_model() -> tuple[Response, int]:
             }
         ), 200
     except Exception as e:
-        app.logger.error('Error processing message: %s', e)
+        app.logger.error('Error when getting model info: %s', e)
         return jsonify({'error': 'Internal server error'}), 500
 
 

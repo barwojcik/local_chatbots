@@ -14,6 +14,7 @@ output = model_handler.predict("What is the capital of France?")
 """
 
 import logging
+from pyexpat.errors import messages
 from typing import Any, Optional
 from collections import deque
 from ollama import Client, ListResponse, ChatResponse
@@ -186,6 +187,12 @@ class OllamaModelHandler:
         """
         self._chat_history.append(prompt)
         logger.info('%s has been added to chat history.', prompt)
+
+    def get_history(self) -> list[dict[str, str]]:
+        allowed_keys: list[str] = ['role', 'content']
+        message_history: list[dict[str, str]] = list(self._chat_history)
+        message_history = [{k:v for k, v in e if k in allowed_keys} for e in message_history]
+        return message_history
 
     def predict(self, prompt_text: str) -> str:
         """
