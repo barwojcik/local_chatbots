@@ -44,11 +44,9 @@ def messages_route() -> tuple[Response, int]:
 def get_messages() -> tuple[Response, int]:
     """Get the chat history."""
     try:
-        message_history: list[dict[str, str]] = model.get_history()
-        app.logger.info("Bot chat history acquired.")
         return jsonify({
             "status": "success",
-            "messages": message_history,
+            "messages": model.get_history(),
         }), 200
     except Exception as e:
         app.logger.error("Error when getting chat history: %s", e)

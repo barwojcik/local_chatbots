@@ -191,7 +191,7 @@ class OllamaModelHandler:
     def get_history(self) -> list[dict[str, str]]:
         allowed_keys: list[str] = ['role', 'content']
         message_history: list[dict[str, str]] = list(self._chat_history)
-        message_history = [{k:v for k, v in e if k in allowed_keys} for e in message_history]
+        message_history = [{k:v for k, v in msg.items() if k in allowed_keys} for msg in message_history]
         return message_history
 
     def predict(self, prompt_text: str) -> str:

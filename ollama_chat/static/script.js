@@ -202,13 +202,44 @@ const populateBotResponse = async (userMessage) => {
             botResponse: "Hello there! I'm your friendly AI assistant, ready to chat!"
         };
         STATE.isFirstMessage = false;
-    } else {
-        response = await processUserMessage(userMessage);
+        renderBotResponse(response);
     }
-
-    renderBotResponse(response);
+    if (userMessage){
+        response = await processUserMessage(userMessage);
+        renderBotResponse(response);
+    }
+    hideBotLoadingAnimation();
 };
 
+// Function to fetch history data from server
+async function fetchHistoryData() {
+    try {
+        const response = await fetch('/messages');
+        if (!response.ok) {
+            throw new Error(`Server responded with status: ${response.status}`);
+        }
+        let msg;
+        const data = await response.json();
+        if (data.status === 'success'){
+            if (data.messages.length > 0){
+                data.messages.forEach((message) => {
+                    if (message.role === 'user'){
+                        populateUserMessage(message.content)
+                    }
+                    if (message.role === 'assistant'){
+                        msg = {
+                            botResponse: message.content
+                        };
+                        renderBotResponse(msg);
+                    }
+                })
+                STATE.isFirstMessage = false;
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching history data:', error);
+    }
+}
 
 // Function to fetch model data from server
 async function fetchModelData() {
@@ -314,5 +345,6 @@ $(document).ready(() => {
 
     // Start the chat
     fetchModelData();
+    fetchHistoryData();
     populateBotResponse();
 });
