@@ -18,25 +18,25 @@ from model import OllamaModelHandler
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
-app.config.from_object('config')
+app.config.from_object("config")
 cfg = app.config
-app.logger.setLevel(cfg['LOG_LEVEL'])
+app.logger.setLevel(cfg["LOG_LEVEL"])
 
 # Initialize the model handler with the model configuration from the config file
-model: OllamaModelHandler = OllamaModelHandler.from_config(cfg['MODEL'])
+model: OllamaModelHandler = OllamaModelHandler.from_config(cfg["MODEL"])
 
 
 # Define the route for the index page
-@app.route('/', methods=['GET'])
+@app.route("/", methods=["GET"])
 def index() -> str:
     """Render the index page for the chatbot."""
-    return render_template('index.html')  # Render the index.html template
+    return render_template("index.html")  # Render the index.html template
 
 
 # Define the route for processing messages
-@app.route('/messages', methods=['GET', 'POST'])
+@app.route("/messages", methods=["GET", "POST"])
 def messages_route() -> tuple[Response, int]:
-    if request.method == 'GET':
+    if request.method == "GET":
         return get_messages()
     return process_message()
 
@@ -44,62 +44,87 @@ def messages_route() -> tuple[Response, int]:
 def get_messages() -> tuple[Response, int]:
     """Get the chat history."""
     try:
-        return jsonify({
-            "status": "success",
-            "messages": model.get_history(),
-        }), 200
+        return (
+            jsonify(
+                {
+                    "status": "success",
+                    "messages": model.get_history(),
+                }
+            ),
+            200,
+        )
     except Exception as e:
         app.logger.error("Error when getting chat history: %s", e)
-        return jsonify({
-            "status": "error",
-        }), 500
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                }
+            ),
+            500,
+        )
 
 
 def process_message() -> tuple[Response, int]:
     """Process user messages and return chatbot responses."""
     try:
         # Extract the user's message from the request
-        user_message: str = request.json['userMessage']
-        app.logger.info('User message: %s', user_message)
+        user_message: str = request.json["userMessage"]
+        app.logger.info("User message: %s", user_message)
 
         # Process the user's message using the worker module
         bot_response: str = model.predict(user_message)
-        app.logger.info('Bot response: %s', bot_response)
+        app.logger.info("Bot response: %s", bot_response)
 
         # Return the bot's response as JSON
-        return jsonify({
-            "botResponse": bot_response,
-        }), 200
+        return (
+            jsonify(
+                {
+                    "botResponse": bot_response,
+                }
+            ),
+            200,
+        )
 
     except KeyError:
         app.logger.error('Missing "userMessage" key in request data.')
-        return jsonify({'error': 'Missing "userMessage" key in request data.'}), 400
+        return jsonify({"error": 'Missing "userMessage" key in request data.'}), 400
 
     except Exception as e:
-        app.logger.error('Error processing message: %s', e)
-        return jsonify({'error': 'Failed to process message.'}), 500
+        app.logger.error("Error processing message: %s", e)
+        return jsonify({"error": "Failed to process message."}), 500
 
 
 # Define the route for resetting model chat history
-@app.route('/reset-chat-history', methods=['GET'])
+@app.route("/reset-chat-history", methods=["GET"])
 def reset_chat_history_route() -> tuple[Response, int]:
     """Reset the chat history."""
     try:
         model.clear_history()
         app.logger.info("Bot chat history cleared.")
-        return jsonify({
-            "status": "success",
-            "message": "Chat history cleared",
-        }), 200
+        return (
+            jsonify(
+                {
+                    "status": "success",
+                    "message": "Chat history cleared",
+                }
+            ),
+            200,
+        )
     except Exception as e:
         app.logger.error("Error resetting chat history: %s", e)
-        return jsonify({
-            "status": "error",
-            "message": f"Error resetting chat history: {e}",
-        }), 500
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": f"Error resetting chat history: {e}",
+                }
+            ),
+            500,
+        )
 
 
-@app.route('/model', methods=['GET', 'POST'])
+@app.route("/model", methods=["GET", "POST"])
 def process_model_route() -> tuple[Response, int]:
     """
     Processes a model based on the HTTP request method.
@@ -109,7 +134,7 @@ def process_model_route() -> tuple[Response, int]:
         tuple[Response, int]: A tuple containing a `Response` object and an integer indicating
             the HTTP status code.
     """
-    if request.method == 'GET':
+    if request.method == "GET":
         return process_get_model()
 
     return process_set_model()
@@ -126,16 +151,19 @@ def process_get_model() -> tuple[Response, int]:
             actively selected model.
     """
     try:
-        return jsonify(
-            {
-                "success": True,
-                "available_models": model.get_available_model_names(),
-                "current_model": model.get_current_model_name(),
-            }
-        ), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "available_models": model.get_available_model_names(),
+                    "current_model": model.get_current_model_name(),
+                }
+            ),
+            200,
+        )
     except Exception as e:
-        app.logger.error('Error when getting model info: %s', e)
-        return jsonify({'error': 'Internal server error'}), 500
+        app.logger.error("Error when getting model info: %s", e)
+        return jsonify({"error": "Internal server error"}), 500
 
 
 def process_set_model() -> tuple[Response, int]:
@@ -147,18 +175,18 @@ def process_set_model() -> tuple[Response, int]:
         tuple[Response, int]: A tuple containing a ``Response`` object and an integer status code.
     """
     try:
-        model_name = request.json['model']
-        app.logger.info('Setting model to %s', model_name)
+        model_name = request.json["model"]
+        app.logger.info("Setting model to %s", model_name)
         if model.set_model(model_name):
             return jsonify({"success": True}), 200
         else:
             return jsonify({"success": False, "error": "Invalid model name"}), 400
     except KeyError as e:
-        app.logger.error('Missing key in request data: %s', e)
-        return jsonify({'error': f'Missing required field: {str(e)}'}), 400
+        app.logger.error("Missing key in request data: %s", e)
+        return jsonify({"error": f"Missing required field: {str(e)}"}), 400
     except Exception as e:
-        app.logger.error('Error processing message: %s', e)
-        return jsonify({'error': 'Internal server error'}), 500
+        app.logger.error("Error processing message: %s", e)
+        return jsonify({"error": "Internal server error"}), 500
 
 
 # Run the Flask app

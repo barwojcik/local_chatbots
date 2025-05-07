@@ -7,23 +7,24 @@ see: https://python.langchain.com/api_reference/huggingface/embeddings/langchain
 For text splitter configuration, see: https://huggingface.co/docs/langchain/main_classes/text_splitter/recursive_character_text_splitter
 For query parameters configuration, see: https://huggingface.co/docs/vectorstores/main_classes/retrievers#retriever.similarity_search
 """
+
 import logging
 
 DEBUG = False
 TESTING = False
 LOG_LEVEL = logging.INFO
 MODEL = dict(
-    model_id='meta-llama/Llama-3.2-1B-Instruct',
+    model_id="meta-llama/Llama-3.2-1B-Instruct",
     device="cuda:0",
     max_history_messages=10,
     model_params=dict(
-            max_new_tokens=600,
-        ),
+        max_new_tokens=600,
+    ),
 )
 VECTOR_STORE = dict(
     embeddings_model="sentence-transformers/all-MiniLM-L6-v2",
     model_kwargs=dict(
-        device='cuda:0',
+        device="cuda:0",
     ),
     splitter_params=dict(
         chunk_size=1024,
@@ -34,6 +35,6 @@ VECTOR_STORE = dict(
     ),
 )
 FILES = dict(
-    upload_folder='uploads',
-    extensions=['pdf'],
+    upload_folder="uploads",
+    extensions=["pdf"],
 )

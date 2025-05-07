@@ -12,6 +12,7 @@ file_path = file_handler.save_file(file)
 # do something with the saved file
 file_handler.cleanup_file(file_path)
 """
+
 import os
 from typing import Any
 from werkzeug.utils import secure_filename
@@ -19,6 +20,7 @@ from werkzeug.datastructures.file_storage import FileStorage
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class FileHandler:
     """
@@ -39,10 +41,11 @@ class FileHandler:
         save_file: Save an uploaded file securely.
         cleanup_file: Remove a processed file from the upload directory.
     """
+
     def __init__(
-            self,
-            upload_folder: str = 'uploads',
-            extensions: list[str] = None,
+        self,
+        upload_folder: str = "uploads",
+        extensions: list[str] = None,
     ) -> None:
         """
         Initialize FileHandler with a specified upload folder.
@@ -52,7 +55,7 @@ class FileHandler:
             extensions (list[str]): List of allowed file extensions (default: ['pdf'])
         """
         self.upload_folder = upload_folder
-        self._allowed_extensions = ({*extensions} or {'pdf'})
+        self._allowed_extensions = {*extensions} or {"pdf"}
         self._create_upload_directory()
 
     @classmethod
@@ -85,7 +88,7 @@ class FileHandler:
         if not filename:
             raise ValueError("No file provided.")
 
-        if not '.' in filename:
+        if not "." in filename:
             raise ValueError("Invalid file extension.")
 
         if not filename.lower().endswith(tuple(*self._allowed_extensions)):

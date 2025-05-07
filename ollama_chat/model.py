@@ -33,14 +33,14 @@ class OllamaModelHandler:
             max_history_messages (int): The maximum number of messages to keep in the chat history.
     """
 
-    DEFAULT_MODEL: str = 'llama3.2:1b'
+    DEFAULT_MODEL: str = "llama3.2:1b"
 
     def __init__(
-            self,
-            model_name: Optional[str] = None,
-            ollama_host: Optional[str] = None,
-            chat_kwargs: Optional[dict[str, Any]] = None,
-            max_history_messages: int = 10,
+        self,
+        model_name: Optional[str] = None,
+        ollama_host: Optional[str] = None,
+        chat_kwargs: Optional[dict[str, Any]] = None,
+        max_history_messages: int = 10,
     ) -> None:
         """
         Initializes the ModelHandler with the specified model and parameters.
@@ -54,7 +54,7 @@ class OllamaModelHandler:
         self._model_name: str = model_name
         self._is_model_initialized: bool = False
         self._client: Client = Client(host=ollama_host)
-        self._chat_kwargs: dict = (chat_kwargs or dict())
+        self._chat_kwargs: dict = chat_kwargs or dict()
         self._chat_history: deque[dict[str, str]] = deque([], max_history_messages)
 
         if self.is_service_available():
@@ -80,7 +80,7 @@ class OllamaModelHandler:
         if self._model_name == self.DEFAULT_MODEL:
             return False
 
-        logger.warning('Falling back to default model %s', self.DEFAULT_MODEL)
+        logger.warning("Falling back to default model %s", self.DEFAULT_MODEL)
         if self.is_model_available(self.DEFAULT_MODEL):
             self._model_name = self.DEFAULT_MODEL
             return True
@@ -123,10 +123,10 @@ class OllamaModelHandler:
         try:
             _ = self._get_available_models()
         except ConnectionError as e:
-            logger.error('Ollama connection error: %s', e)
+            logger.error("Ollama connection error: %s", e)
             return False
         except Exception as e:
-            logger.error('Ollama service is not available: %s', e)
+            logger.error("Ollama service is not available: %s", e)
             return False
 
         return True
@@ -135,16 +135,16 @@ class OllamaModelHandler:
         """Check if a specified model is available."""
         available_model_names: list[str] = self.get_available_model_names()
         if model_name in available_model_names:
-            logger.info('Model %s found in available models', model_name)
+            logger.info("Model %s found in available models", model_name)
             return True
 
-        logger.warning('Model %s not found, attempting to pull from repository', model_name)
+        logger.warning("Model %s not found, attempting to pull from repository", model_name)
         try:
             self._client.pull(model_name)
-            logger.info('Model %s successfully pulled', model_name)
+            logger.info("Model %s successfully pulled", model_name)
             return True
         except Exception as e:
-            logger.error('Failed to pull model %s: %s', model_name, e)
+            logger.error("Failed to pull model %s: %s", model_name, e)
             return False
 
     def set_model(self, model_name: str) -> bool:
@@ -154,7 +154,7 @@ class OllamaModelHandler:
 
         self._model_name = model_name
         self._is_model_initialized = True
-        logger.info('Model set to %s', model_name)
+        logger.info("Model set to %s", model_name)
         return True
 
     def clear_history(self) -> None:
@@ -174,7 +174,7 @@ class OllamaModelHandler:
             dict: The preprocessed prompt as a dictionary containing the role and content keys
             ({'role': 'user', 'content': 'What is the capital of France?'}).
         """
-        prompt: dict[str, str] = {'role': 'user', 'content': prompt_text}
+        prompt: dict[str, str] = {"role": "user", "content": prompt_text}
         return prompt
 
     def _add_to_history(self, prompt: dict[str, str]) -> None:
@@ -186,12 +186,12 @@ class OllamaModelHandler:
 
         """
         self._chat_history.append(prompt)
-        logger.info('%s has been added to chat history.', prompt)
+        logger.info("%s has been added to chat history.", prompt)
 
     def get_history(self) -> list[dict[str, str]]:
-        allowed_keys: list[str] = ['role', 'content']
+        allowed_keys: list[str] = ["role", "content"]
         message_history: list[dict[str, str]] = list(self._chat_history)
-        message_history = [{k:v for k, v in msg.items() if k in allowed_keys} for msg in message_history]
+        message_history = [{k: v for k, v in msg.items() if k in allowed_keys} for msg in message_history]
         return message_history
 
     def predict(self, prompt_text: str) -> str:
@@ -217,7 +217,7 @@ class OllamaModelHandler:
                 **self._chat_kwargs,
             )
 
-            logger.debug('Ollama response: %s', ollama_response)
+            logger.debug("Ollama response: %s", ollama_response)
             self._add_to_history(dict(ollama_response.message))
             return ollama_response.message.content
         except Exception as e:
