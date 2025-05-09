@@ -32,20 +32,20 @@ class VectorStoreHandler:
     """
     Handles the loading, chunking, embedding, and querying of documents within a vector store.
 
-    This class uses LangChain for document loading and chunking, Hugging Face for embeddings,
+    This class uses LangChain for document loading and chunking, Ollama for embeddings,
     and Chroma as the vector database.
 
     Attributes:
-        embeddings (HuggingFaceEmbeddings): The embedding model used to generate document embeddings.
+        embeddings (OllamaEmbeddings): The embedding model used to generate document embeddings.
         vector_store (Chroma): The vector store used to store and manage document embeddings.
         splitter_params (dict[str, Any]): Additional parameters for the text splitter.
         query_params (dict[str, Any]): Additional parameters for the similarity search query.
 
     Args:
-        embeddings_model (str, optional): The identifier of the Hugging Face embeddings model.
-            Defaults to "sentence-transformers/all-MiniLM-L6-v2".
+        embeddings_model (str, optional): The identifier of the Ollama embeddings model.
+            Defaults to "llama3.2:1b".
+        ollama_host (str, optional): The hostname of the Ollama.
         model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embedding model.
-                If not provided, defaults to {"device": "cuda:0"} if CUDA is available, otherwise to {"device": "cpu"}.
         splitter_params (dict[str, Any], optional): Additional parameters for the text splitter.
         query_params (dict[str, Any], optional): Additional parameters for the similarity search query.
 
