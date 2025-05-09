@@ -72,6 +72,10 @@ A powerful RAG-based chatbot application that enhances Large Language Model (LLM
    ```bash
    flask --app app.py run
    ```
+   alternatively, start docker container
+   ```bash
+   docker start simple-rag
+   ```
 
 2. Open your web browser and navigate to `http://localhost:5000`
 
