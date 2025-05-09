@@ -23,7 +23,7 @@ cfg = app.config
 app.logger.setLevel(cfg["LOG_LEVEL"])
 
 # Initialize the model handler with the model configuration from the config file
-model: OllamaModelHandler = OllamaModelHandler.from_config(cfg["MODEL"])
+model: OllamaModelHandler = OllamaModelHandler.from_config(cfg["MODEL"]) if "MODEL" in cfg else OllamaModelHandler()
 
 
 # Define the route for the index page

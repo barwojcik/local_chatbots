@@ -50,8 +50,7 @@ A powerful chatbot application that provides an interactive chat interface throu
 
 2. Run the container:
    ```bash
-   docker run -p 5000:5000 \
-       --name ollama-chat \
+   docker run --name ollama-chat \
        --network host \
        ollama-chat
    ```
