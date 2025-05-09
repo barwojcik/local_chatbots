@@ -365,7 +365,7 @@ $(document).ready(() => {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch(`${STATE.baseUrl}/process-document`, {
+            const response = await fetch(`${STATE.baseUrl}/document`, {
                 method: "POST",
                 headers: { Accept: "application/json" },
                 body: formData
@@ -375,9 +375,8 @@ $(document).ready(() => {
                 throw new Error(`Upload failed with status: ${response.status}`);
             }
 
-            $('#upload-button').prop('disabled', true);
             const responseData = await response.json();
-            console.log('/process-document', responseData);
+            console.log('/document', responseData);
             renderBotResponse(responseData, '');
 
         } catch (error) {
