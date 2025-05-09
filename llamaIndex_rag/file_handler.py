@@ -28,7 +28,6 @@ class FileHandler:
 
     Attributes:
         upload_folder (str): Directory where uploaded files will be stored
-        _allowed_extensions (set[str]): Set of allowed file extensions (default: {'pdf'})
 
     Args:
         upload_folder (str): Directory where uploaded files will be stored
@@ -36,8 +35,6 @@ class FileHandler:
 
     Methods:
         from_config (cls, config): Creates a new instance of the FileHandler class from a configuration dictionary.
-        _create_upload_directory: Creates an upload directory if it doesn't exist.
-        _allowed_file: Check if the file extension is allowed.
         save_file: Save an uploaded file securely.
         cleanup_file: Remove a processed file from the upload directory.
     """

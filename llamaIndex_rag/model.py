@@ -1,16 +1,17 @@
 """
-This module provides a `RAGOllamaModelHandler` class for using Ollama pre-trained text generation models.
+This module provides a `RAGOllamaModelHandler` class for using Ollama pre-trained text generation models with
+Retrieval Augmented Generation (RAG).
 
 The `RAGOllamaModelHandler` class simplifies the process of loading, initializing, and using
-a text generation model from the `ollama` library. It provides methods
-for preprocessing prompts, generating text, and maintaining a chat history.
+a text generation model from the `ollama` library, incorporating external context for improved responses.
+It provides methods for preprocessing prompts, generating text, and maintaining a chat history.
 
 The module also includes basic logging functionality to provide information about
 the model's initialization and usage.
 
 Example usage:
-model_handler = ModelHandler("meta-llama/Llama-3.2-1B-Instruct")
-output = model_handler.predict("What is the capital of France?")
+model_handler = RAGOllamaModelHandler()
+output = model_handler.predict("What is the capital of France?", context=["The capital of France is Paris."])
 """
 
 import logging
@@ -26,10 +27,21 @@ class RAGOllamaModelHandler:
     Handles interactions with the Ollama service.
 
     Args:
-            model_name (str): The identifier of the pre-trained model to use.
-            ollama_host (str): The host of the Ollama service.
-            chat_kwargs (dict[str, Any]): Additional keyword arguments passed to the chat method.
-            max_history_messages (int): The maximum number of messages to keep in the chat history.
+        model_name (str): The identifier of the pre-trained model to use.
+        ollama_host (str): The host of the Ollama service.
+        chat_kwargs (dict[str, Any]): Additional keyword arguments passed to the chat method.
+        max_history_messages (int): The maximum number of messages to keep in the chat history.
+
+    Methods:
+        from_config(cfg): Creates a new instance of the OllamaModelHandler class from a configuration dictionary.
+        get_available_model_names(): Returns a list of available Ollama models.
+        get_current_model_name(): Returns the current Ollama model identifier.
+        is_service_available(): Returns True if the Ollama service is available.
+        is_model_available(model_name:str): Returns True if the Ollama model is available.
+        set_model(model_name:str): Sets the model identifier to the given value.
+        clear_history(): Clears the chat history.
+        get_history(): Returns the chat history.
+        predict(prompt_text: str): Generates text based on the prompt and chat history.
     """
 
     DEFAULT_MODEL: str = "llama3.2:1b"
@@ -42,7 +54,7 @@ class RAGOllamaModelHandler:
         max_history_messages: int = 10,
     ) -> None:
         """
-        Initializes the ModelHandler with the specified model and parameters.
+        Initializes the RAGOllamaModelHandler with the specified model and parameters.
 
         Args:
             model_name (str): The identifier of the pre-trained model to use.
@@ -61,7 +73,7 @@ class RAGOllamaModelHandler:
 
     @classmethod
     def from_config(cls, model_config: dict[str, Any]) -> "RAGOllamaModelHandler":
-        """Creates a new instance of the OllamaModelHandler class from a configuration dictionary.
+        """Creates a new instance of the RAGOllamaModelHandler class from a configuration dictionary.
 
         Args:
             model_config: Configuration dictionary containing model settings.
@@ -176,6 +188,25 @@ class RAGOllamaModelHandler:
         prompt: dict[str, str] = {"role": "user", "content": prompt_text}
         return prompt
 
+    @staticmethod
+    def _preprocess_rag_prompt(prompt_text: str, context: list[str]) -> dict[str, str]:
+        """
+        Preprocesses the prompt by incorporating context and returns it as a dictionary.
+
+        Args:
+            prompt_text (str): The user's prompt text.
+            context (list[str]): A list of strings representing the external context.
+
+        Returns:
+            prompt (dict[str, str]): The preprocessed prompt with injected context in
+                the form of a dictionary containing the role and content keys
+        """
+        prompt: dict[str, str] = {
+            "role": "user",
+            "content": f'Given context listed:{" ".join(context)} Answer based on the context. {prompt_text}',
+        }
+        return prompt
+
     def _add_to_history(self, prompt: dict[str, str]) -> None:
         """
         Adds a prompt to the chat history.
@@ -193,7 +224,7 @@ class RAGOllamaModelHandler:
         message_history = [{k: v for k, v in msg.items() if k in allowed_keys} for msg in message_history]
         return message_history
 
-    def predict(self, prompt_text: str) -> str:
+    def predict(self, prompt_text: str, context: list[str] = None) -> str:
         """
         Generates text based on the prompt and chat history.
 
@@ -206,7 +237,10 @@ class RAGOllamaModelHandler:
         if not self._is_model_initialized:
             self._init_model()
 
-        prompt: dict[str, str] = self._preprocess_prompt(prompt_text)
+        if context:
+            prompt: dict[str, str] = self._preprocess_rag_prompt(prompt_text, context)
+        else:
+            prompt: dict[str, str] = self._preprocess_prompt(prompt_text)
         self._add_to_history(prompt)
         try:
             ollama_response: ChatResponse = self._client.chat(

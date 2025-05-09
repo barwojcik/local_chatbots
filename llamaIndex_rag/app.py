@@ -25,10 +25,17 @@ app.config.from_object("config")
 cfg = app.config
 app.logger.setLevel(cfg["LOG_LEVEL"])
 
-# Initialize the model handler with the model configuration from the config file
-model: RAGOllamaModelHandler = RAGOllamaModelHandler.from_config(cfg["MODEL"])
-vector_store: VectorStoreHandler = VectorStoreHandler.from_config(cfg["VECTOR_STORE"])
-file_handler: FileHandler = FileHandler.from_config(cfg["FILES"])
+model: RAGOllamaModelHandler = (
+    RAGOllamaModelHandler.from_config(cfg["MODEL"]) if "MODEL" in cfg else RAGOllamaModelHandler()
+)
+
+vector_store: VectorStoreHandler = (
+    VectorStoreHandler.from_config(cfg["VECTOR_STORE"]) if "VECTOR_STORE" in cfg else VectorStoreHandler()
+)
+
+file_handler: FileHandler = (
+    FileHandler.from_config(cfg["FILES"]) if "FILES" in cfg else FileHandler()
+)
 
 
 # Define the route for the index page
