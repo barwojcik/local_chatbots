@@ -27,10 +27,21 @@ class OllamaModelHandler:
     Handles interactions with the Ollama service.
 
     Args:
-            model_name (str): The identifier of the pre-trained model to use.
-            ollama_host (str): The host of the Ollama service.
-            chat_kwargs (dict[str, Any]): Additional keyword arguments passed to the chat method.
-            max_history_messages (int): The maximum number of messages to keep in the chat history.
+        model_name (str): The identifier of the pre-trained model to use.
+        ollama_host (str): The host of the Ollama service.
+        chat_kwargs (dict[str, Any]): Additional keyword arguments passed to the chat method.
+        max_history_messages (int): The maximum number of messages to keep in the chat history.
+
+    Methods:
+        from_config(cfg): Creates a new instance of the OllamaModelHandler class from a configuration dictionary.
+        get_available_model_names(): Returns a list of available Ollama models.
+        get_current_model_name(): Returns the current Ollama model identifier.
+        is_service_available(): Returns True if the Ollama service is available.
+        is_model_available(model_name:str): Returns True if the Ollama model is available.
+        set_model(model_name:str): Sets the model identifier to the given value.
+        clear_history(): Clears the chat history.
+        get_history(): Returns the chat history.
+        predict(prompt_text: str): Generates text based on the prompt and chat history.
     """
 
     DEFAULT_MODEL: str = "llama3.2:1b"
@@ -62,7 +73,8 @@ class OllamaModelHandler:
 
     @classmethod
     def from_config(cls, model_config: dict[str, Any]) -> "OllamaModelHandler":
-        """Creates a new instance of the OllamaModelHandler class from a configuration dictionary.
+        """
+        Creates a new instance of the OllamaModelHandler class from a configuration dictionary.
 
         Args:
             model_config: Configuration dictionary containing model settings.

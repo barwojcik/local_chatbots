@@ -1,5 +1,6 @@
 """
-This module provides a `RAGModelHandler` class for using pre-trained text generation models with Retrieval Augmented Generation (RAG).
+This module provides a `RAGModelHandler` class for using pre-trained text generation models with
+Retrieval Augmented Generation (RAG).
 
 The `RAGModelHandler` class simplifies the process of loading, initializing, and using
 a text generation model from the `transformers` library, incorporating external context for improved responses.
