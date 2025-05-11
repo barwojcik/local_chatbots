@@ -8,7 +8,7 @@ It leverages the LangChain and Hugging Face ecosystems to provide a streamlined 
 handling document processing and similarity search.
 
 Example usage:
-python from your_module import VectorStoreHandler
+from your_module import VectorStoreHandler
 
 handler = VectorStoreHandler()
 handler.process_document("path/to/your_document.pdf")
@@ -37,10 +37,7 @@ class VectorStoreHandler:
     and Chroma as the vector database.
 
     Attributes:
-        embeddings (HuggingFaceEmbeddings): The embedding model used to generate document embeddings.
         vector_store (Chroma): The vector store used to store and manage document embeddings.
-        splitter_params (dict[str, Any]): Additional parameters for the text splitter.
-        query_params (dict[str, Any]): Additional parameters for the similarity search query.
 
     Args:
         embeddings_model (str, optional): The identifier of the Hugging Face embeddings model.
@@ -80,15 +77,15 @@ class VectorStoreHandler:
         if "device" not in model_kwargs.keys():
             model_kwargs["device"] = "cuda:0" if torch.cuda.is_available() else "cpu"
         logger.info("Embeddings model will be initialized on %s.", model_kwargs["device"])
-        self.embeddings: HuggingFaceEmbeddings = HuggingFaceEmbeddings(
+        self._embeddings: HuggingFaceEmbeddings = HuggingFaceEmbeddings(
             model_name=embeddings_model,
             model_kwargs=model_kwargs,
         )
         logger.info("Embeddings model %s has been initialized.", embeddings_model)
-        self.vector_store: Chroma = Chroma(embedding_function=self.embeddings)
+        self.vector_store: Chroma = Chroma(embedding_function=self._embeddings)
         logger.info("Vector store has been initialized.")
-        self.splitter_params: dict[str, Any] = splitter_params or dict()
-        self.query_params: dict[str, Any] = query_params or dict()
+        self._splitter_params: dict[str, Any] = splitter_params or dict()
+        self._query_params: dict[str, Any] = query_params or dict()
 
     @classmethod
     def from_config(cls, vector_store_config: dict[str, str]) -> "VectorStoreHandler":
@@ -120,9 +117,9 @@ class VectorStoreHandler:
         # Load and chunk the document
         logger.info("Processing %s.", document_path)
         loader: PyPDFLoader = PyPDFLoader(document_path)
-        logger.info("Document will be slit with parameters: %s", self.splitter_params)
+        logger.info("Document will be slit with parameters: %s", self._splitter_params)
 
-        text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(**self.splitter_params)
+        text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(**self._splitter_params)
         chunks: list[Document] = loader.load_and_split(text_splitter)
         self._clean_chunks(chunks)
 
@@ -139,7 +136,7 @@ class VectorStoreHandler:
         Returns:
             context (list[str]): A list of relevant text chunks from the stored documents.
         """
-        documents: list[Document] = self.vector_store.similarity_search(query, **self.query_params)
+        documents: list[Document] = self.vector_store.similarity_search(query, **self._query_params)
         context: list[str] = [doc.page_content for doc in documents]
         logger.info("Query %s returned %s", query, context)
         return context

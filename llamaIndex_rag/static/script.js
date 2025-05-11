@@ -355,15 +355,20 @@ $(document).ready(() => {
 
     $("#file-upload").on("change", async function () {
         try {
-            const file = this.files[0];
-            if (!file || !file.type.includes('pdf')) {
-                throw new Error("Please select a valid PDF file");
-            }
-
             await showBotLoadingAnimation();
 
             const formData = new FormData();
-            formData.append('file', file);
+            let i = 1;
+            for (const file of this.files) { // Accessing files directly from this.files
+                if (file.type.includes('pdf')) {
+                    formData.append(`file${i}`, file);
+                    i++;
+                }
+            }
+
+            if (formData.length === 0) {
+                throw new Error("Please select at least one valid file");
+            }
 
             const response = await fetch(`${STATE.baseUrl}/document`, {
                 method: "POST",

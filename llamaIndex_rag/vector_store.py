@@ -4,11 +4,11 @@ This module provides a `VectorStoreHandler` class for managing and querying a ve
 The `VectorStoreHandler` class facilitates the process of loading, chunking, embedding, and storing
 documents within a vector store, primarily for semantic search and retrieval of relevant information.
 
-It leverages the LangChain and Hugging Face ecosystems to provide a streamlined workflow for
-handling document processing and similarity search.
+It leverages the LlamaIndex and Ollama ecosystems to provide a streamlined workflow for handling document
+processing and similarity search.
 
 Example usage:
-python from your_module import VectorStoreHandler
+from your_module import VectorStoreHandler
 
 handler = VectorStoreHandler()
 handler.process_document("path/to/your_document.pdf")
@@ -18,13 +18,12 @@ print(context) # Output: List of relevant text chunks
 """
 
 import logging
-import torch
-from typing import Any
+from typing import Any, Optional
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document
 from langchain_community.vectorstores import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_ollama import OllamaEmbeddings
 
 logger = logging.getLogger(__name__)
 
@@ -33,20 +32,16 @@ class VectorStoreHandler:
     """
     Handles the loading, chunking, embedding, and querying of documents within a vector store.
 
-    This class uses LangChain for document loading and chunking, Hugging Face for embeddings,
+    This class uses LangChain for document loading and chunking, Ollama for embeddings,
     and Chroma as the vector database.
 
     Attributes:
-        embeddings (HuggingFaceEmbeddings): The embedding model used to generate document embeddings.
         vector_store (Chroma): The vector store used to store and manage document embeddings.
-        splitter_params (dict[str, Any]): Additional parameters for the text splitter.
-        query_params (dict[str, Any]): Additional parameters for the similarity search query.
 
     Args:
-        embeddings_model (str, optional): The identifier of the Hugging Face embeddings model.
-            Defaults to "sentence-transformers/all-MiniLM-L6-v2".
+        embeddings_model (str, optional): The identifier of the Ollama embeddings model. Default "llama3.2:1b".
+        ollama_host (str, optional): The hostname of the Ollama.
         model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embedding model.
-                If not provided, defaults to {"device": "cuda:0"} if CUDA is available, otherwise to {"device": "cpu"}.
         splitter_params (dict[str, Any], optional): Additional parameters for the text splitter.
         query_params (dict[str, Any], optional): Additional parameters for the similarity search query.
 
@@ -57,9 +52,12 @@ class VectorStoreHandler:
         reset(): Resets the vector store by deleting the content of the collection.
     """
 
+    DEFAULT_MODEL: str = "llama3.2:1b"
+
     def __init__(
         self,
-        embeddings_model="sentence-transformers/all-MiniLM-L6-v2",
+        embeddings_model: Optional[str] = None,
+        ollama_host: Optional[str] = None,
         model_kwargs: dict[str, Any] = None,
         splitter_params: dict[str, Any] = None,
         query_params: dict[str, Any] = None,
@@ -71,24 +69,21 @@ class VectorStoreHandler:
             embeddings_model (str, optional): The identifier of the Hugging Face embeddings model.
                 Defaults to "sentence-transformers/all-MiniLM-L6-v2".
             model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embeddings model.
-                If not provided, defaults to {"device": "cuda:0"} if CUDA is available, otherwise to {"device": "cpu"}.
             splitter_params (dict[str, Any], optional): Additional parameters for the text splitter.
             query_params (dict[str, Any], optional): Additional parameters for the similarity search query.
         """
         logger.info("Initializing vector store...")
         model_kwargs = model_kwargs or dict()
-        if "device" not in model_kwargs.keys():
-            model_kwargs["device"] = "cuda:0" if torch.cuda.is_available() else "cpu"
-        logger.info("Embeddings model will be initialized on %s.", model_kwargs["device"])
-        self.embeddings: HuggingFaceEmbeddings = HuggingFaceEmbeddings(
-            model_name=embeddings_model,
-            model_kwargs=model_kwargs,
+        self._embeddings: OllamaEmbeddings = OllamaEmbeddings(
+            model=(embeddings_model or self.DEFAULT_MODEL),
+            base_url=ollama_host,
+            **model_kwargs,
         )
         logger.info("Embeddings model %s has been initialized.", embeddings_model)
-        self.vector_store: Chroma = Chroma(embedding_function=self.embeddings)
+        self.vector_store: Chroma = Chroma(embedding_function=self._embeddings)
         logger.info("Vector store has been initialized.")
-        self.splitter_params: dict[str, Any] = splitter_params or dict()
-        self.query_params: dict[str, Any] = query_params or dict()
+        self._splitter_params: dict[str, Any] = splitter_params or dict()
+        self._query_params: dict[str, Any] = query_params or dict()
 
     @classmethod
     def from_config(cls, vector_store_config: dict[str, str]) -> "VectorStoreHandler":
@@ -120,9 +115,9 @@ class VectorStoreHandler:
         # Load and chunk the document
         logger.info("Processing %s.", document_path)
         loader: PyPDFLoader = PyPDFLoader(document_path)
-        logger.info("Document will be slit with parameters: %s", self.splitter_params)
+        logger.info("Document will be slit with parameters: %s", self._splitter_params)
 
-        text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(**self.splitter_params)
+        text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(**self._splitter_params)
         chunks: list[Document] = loader.load_and_split(text_splitter)
         self._clean_chunks(chunks)
 
@@ -139,7 +134,7 @@ class VectorStoreHandler:
         Returns:
             context (list[str]): A list of relevant text chunks from the stored documents.
         """
-        documents: list[Document] = self.vector_store.similarity_search(query, **self.query_params)
+        documents: list[Document] = self.vector_store.similarity_search(query, **self._query_params)
         context: list[str] = [doc.page_content for doc in documents]
         logger.info("Query %s returned %s", query, context)
         return context

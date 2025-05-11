@@ -33,9 +33,7 @@ vector_store: VectorStoreHandler = (
     VectorStoreHandler.from_config(cfg["VECTOR_STORE"]) if "VECTOR_STORE" in cfg else VectorStoreHandler()
 )
 
-file_handler: FileHandler = (
-    FileHandler.from_config(cfg["FILES"]) if "FILES" in cfg else FileHandler()
-)
+file_handler: FileHandler = FileHandler.from_config(cfg["FILES"]) if "FILES" in cfg else FileHandler()
 
 
 # Define the route for the index page
@@ -84,8 +82,11 @@ def process_message() -> tuple[Response, int]:
         user_message: str = request.json["userMessage"]
         app.logger.info("User message: %s", user_message)
 
+        # Get context to a user message from the vector store
+        context: list[str] = vector_store.get_context(user_message)
+
         # Process the user's message using the worker module
-        bot_response: str = model.predict(user_message)
+        bot_response: str = model.predict(user_message, context)
         app.logger.info("Bot response: %s", bot_response)
 
         # Return the bot's response as JSON
@@ -109,11 +110,11 @@ def process_message() -> tuple[Response, int]:
 
 # Define the route for processing documents
 @app.route("/document", methods=["POST"])
-def process_document_route() -> tuple[Response, int]:
+def process_document() -> tuple[Response, int]:
     """Process uploaded documents and return a success message to the client."""
     # Check if a file was uploaded
     try:
-        if "file" not in request.files:
+        if not request.files:
             return (
                 jsonify(
                     {
@@ -124,10 +125,10 @@ def process_document_route() -> tuple[Response, int]:
                 400,
             )
 
-        file: FileStorage = request.files["file"]
-        file_path = file_handler.save_file(file)
-        vector_store.process_document(file_path)
-        file_handler.cleanup_file(file_path)
+        for file in request.files.values():
+            file_path: str = file_handler.save_file(file)
+            vector_store.process_document(file_path)
+            file_handler.cleanup_file(file_path)
 
         # Return a success message as JSON
         return (
@@ -149,7 +150,7 @@ def process_document_route() -> tuple[Response, int]:
 
 # Define the route for resetting the vector store
 @app.route("/reset-vector-store", methods=["GET"])
-def reset_vector_store_route() -> tuple[Response, int]:
+def reset_vector_store() -> tuple[Response, int]:
     """Reset the vector store and return a success message to the client."""
     try:
         vector_store.reset()
@@ -178,7 +179,7 @@ def reset_vector_store_route() -> tuple[Response, int]:
 
 # Define the route for resetting model chat history
 @app.route("/reset-chat-history", methods=["GET"])
-def reset_chat_history_route() -> tuple[Response, int]:
+def reset_chat_history() -> tuple[Response, int]:
     """Reset the chat history."""
     try:
         model.clear_history()
@@ -206,7 +207,7 @@ def reset_chat_history_route() -> tuple[Response, int]:
 
 
 @app.route("/model", methods=["GET", "POST"])
-def process_model_route() -> tuple[Response, int]:
+def process_model() -> tuple[Response, int]:
     """
     Processes a model based on the HTTP request method.
 

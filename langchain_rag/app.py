@@ -1,5 +1,5 @@
 """
-LlamaIndex RAG with Ollama using Flask.
+LangChain RAG with Ollama using Flask.
 
 This module defines a RAG application using a Large Language Model (LLM)
 and the Flask framework. It handles user messages, sends them to the LLM for processing,
@@ -114,21 +114,21 @@ def process_document() -> tuple[Response, int]:
     """Process uploaded documents and return a success message to the client."""
     # Check if a file was uploaded
     try:
-        if "file" not in request.files:
+        if not request.files:
             return (
                 jsonify(
                     {
                         "botResponse": "It seems like the file was not uploaded correctly, can you try "
-                        "again. If the problem persists, try using a different file"
+                                       "again. If the problem persists, try using a different file"
                     }
                 ),
                 400,
             )
 
-        file: FileStorage = request.files["file"]
-        file_path = file_handler.save_file(file)
-        vector_store.process_document(file_path)
-        file_handler.cleanup_file(file_path)
+        for file in request.files.values():
+            file_path: str = file_handler.save_file(file)
+            vector_store.process_document(file_path)
+            file_handler.cleanup_file(file_path)
 
         # Return a success message as JSON
         return (

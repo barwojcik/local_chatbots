@@ -8,7 +8,7 @@ It leverages the LangChain and Ollama ecosystems to provide a streamlined workfl
 handling document processing and similarity search.
 
 Example usage:
-python from your_module import VectorStoreHandler
+from your_module import VectorStoreHandler
 
 handler = VectorStoreHandler()
 handler.process_document("path/to/your_document.pdf")
@@ -36,10 +36,7 @@ class VectorStoreHandler:
     and Chroma as the vector database.
 
     Attributes:
-        embeddings (OllamaEmbeddings): The embedding model used to generate document embeddings.
         vector_store (Chroma): The vector store used to store and manage document embeddings.
-        splitter_params (dict[str, Any]): Additional parameters for the text splitter.
-        query_params (dict[str, Any]): Additional parameters for the similarity search query.
 
     Args:
         embeddings_model (str, optional): The identifier of the Ollama embeddings model.
@@ -78,16 +75,16 @@ class VectorStoreHandler:
         """
         logger.info("Initializing vector store...")
         model_kwargs = model_kwargs or dict()
-        self.embeddings: OllamaEmbeddings = OllamaEmbeddings(
+        self._embeddings: OllamaEmbeddings = OllamaEmbeddings(
             model=(embeddings_model or self.DEFAULT_MODEL),
             base_url=ollama_host,
             **model_kwargs,
         )
         logger.info("Embeddings model %s has been initialized.", embeddings_model)
-        self.vector_store: Chroma = Chroma(embedding_function=self.embeddings)
+        self.vector_store: Chroma = Chroma(embedding_function=self._embeddings)
         logger.info("Vector store has been initialized.")
-        self.splitter_params: dict[str, Any] = splitter_params or dict()
-        self.query_params: dict[str, Any] = query_params or dict()
+        self._splitter_params: dict[str, Any] = splitter_params or dict()
+        self._query_params: dict[str, Any] = query_params or dict()
 
     @classmethod
     def from_config(cls, vector_store_config: dict[str, str]) -> "VectorStoreHandler":
@@ -119,9 +116,9 @@ class VectorStoreHandler:
         # Load and chunk the document
         logger.info("Processing %s.", document_path)
         loader: PyPDFLoader = PyPDFLoader(document_path)
-        logger.info("Document will be slit with parameters: %s", self.splitter_params)
+        logger.info("Document will be slit with parameters: %s", self._splitter_params)
 
-        text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(**self.splitter_params)
+        text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(**self._splitter_params)
         chunks: list[Document] = loader.load_and_split(text_splitter)
         self._clean_chunks(chunks)
 
@@ -138,7 +135,7 @@ class VectorStoreHandler:
         Returns:
             context (list[str]): A list of relevant text chunks from the stored documents.
         """
-        documents: list[Document] = self.vector_store.similarity_search(query, **self.query_params)
+        documents: list[Document] = self.vector_store.similarity_search(query, **self._query_params)
         context: list[str] = [doc.page_content for doc in documents]
         logger.info("Query %s returned %s", query, context)
         return context
