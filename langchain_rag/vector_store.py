@@ -4,8 +4,8 @@ This module provides a `VectorStoreHandler` class for managing and querying a ve
 The `VectorStoreHandler` class facilitates the process of loading, chunking, embedding, and storing
 documents within a vector store, primarily for semantic search and retrieval of relevant information.
 
-It leverages the LangChain and Ollama ecosystems to provide a streamlined workflow for
-handling document processing and similarity search.
+It leverages the LlamaIndex and Ollama ecosystems to provide a streamlined workflow for handling document
+processing and similarity search.
 
 Example usage:
 from your_module import VectorStoreHandler
@@ -39,8 +39,7 @@ class VectorStoreHandler:
         vector_store (Chroma): The vector store used to store and manage document embeddings.
 
     Args:
-        embeddings_model (str, optional): The identifier of the Ollama embeddings model.
-            Defaults to "llama3.2:1b".
+        embeddings_model (str, optional): The identifier of the Ollama embeddings model. Default "llama3.2:1b".
         ollama_host (str, optional): The hostname of the Ollama.
         model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embedding model.
         splitter_params (dict[str, Any], optional): Additional parameters for the text splitter.
@@ -48,7 +47,7 @@ class VectorStoreHandler:
 
     Methods:
         clean_chunks(chunks): Removes newlines from text chunks.
-        process_document(document_path): Loads, chunks, embeds, and stores a document in the vector store.
+        process_documents(document_path): Loads, chunks, embeds, and stores documents in the vector store.
         get_context(query): Retrieves relevant context from the vector store based on a query.
         reset(): Resets the vector store by deleting the content of the collection.
     """
@@ -106,7 +105,7 @@ class VectorStoreHandler:
         for chunk in chunks:
             chunk.page_content = chunk.page_content.replace("\n", " ")
 
-    def process_document(self, document_path: str) -> None:
+    def _process_document(self, document_path: str) -> None:
         """
         Loads, chunks, embeds, and stores a document in the vector store.
 
@@ -124,6 +123,19 @@ class VectorStoreHandler:
 
         self.vector_store.add_documents(chunks)
         logger.info("Vector store has been populated from %s.", document_path)
+
+    def process_documents(self, document_paths: list[str] | str) -> None:
+        """
+        Loads, chunks, embeds, and stores documents in the vector store.
+
+        Args:
+            document_paths (list[str] | str): The path or list of paths to the documents to be processed.
+        """
+        if type(document_paths) == str:
+            document_paths = [document_paths]
+
+        for document_path in document_paths:
+            self._process_document(document_path)
 
     def get_context(self, query: str) -> list[str]:
         """
