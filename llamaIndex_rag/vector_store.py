@@ -38,9 +38,6 @@ class VectorStoreHandler:
     This class uses LlamaIndex for document loading and chunking, Ollama for embeddings,
     and Chroma as the vector database.
 
-    Attributes:
-        vector_store (Chroma): The vector store used to store and manage document embeddings.
-
     Args:
         embeddings_model (str, optional): The identifier of the Ollama embeddings model. Default "llama3.2:1b".
         ollama_host (str, optional): The hostname of the Ollama.
@@ -70,8 +67,7 @@ class VectorStoreHandler:
         Initializes the VectorStoreHandler with the specified model and parameters.
 
         Args:
-            embeddings_model (str, optional): The identifier of the Hugging Face embeddings model.
-                Defaults to "sentence-transformers/all-MiniLM-L6-v2".
+            embeddings_model (str, optional): The identifier of the Ollama embeddings model. Default "llama3.2:1b".
             model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embeddings model.
             splitter_params (dict[str, Any], optional): Additional parameters for the text splitter.
             query_params (dict[str, Any], optional): Additional parameters for the similarity search query.
