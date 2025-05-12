@@ -230,6 +230,7 @@ class RAGOllamaModelHandler:
 
         Args:
             prompt_text (str): The prompt text.
+            context (list[str]): A list of strings representing the external context.
 
         Returns:
             str: The generated text.

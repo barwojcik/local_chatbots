@@ -11,7 +11,7 @@ Example usage:
 from your_module import VectorStoreHandler
 
 handler = VectorStoreHandler()
-handler.process_document("path/to/your_document.pdf")
+handler.process_documents(["path/to/your_document.pdf"])
 context = handler.get_context("your search query")
 print(context) # Output: List of relevant text chunks
 
@@ -19,11 +19,14 @@ print(context) # Output: List of relevant text chunks
 
 import logging
 from typing import Any, Optional
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_core.documents import Document
-from langchain_community.vectorstores import Chroma
-from langchain_ollama import OllamaEmbeddings
+
+import chromadb
+from llama_index.core import SimpleDirectoryReader
+from llama_index.core.schema import Document, BaseNode, TextNode
+from llama_index.core.node_parser import SentenceSplitter
+from llama_index.core.vector_stores.types import VectorStoreQuery, VectorStoreQueryResult
+from llama_index.embeddings.ollama import OllamaEmbedding
+from llama_index.vector_stores.chroma import ChromaVectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +35,7 @@ class VectorStoreHandler:
     """
     Handles the loading, chunking, embedding, and querying of documents within a vector store.
 
-    This class uses LangChain for document loading and chunking, Ollama for embeddings,
+    This class uses LlamaIndex for document loading and chunking, Ollama for embeddings,
     and Chroma as the vector database.
 
     Attributes:
@@ -47,12 +50,13 @@ class VectorStoreHandler:
 
     Methods:
         clean_chunks(chunks): Removes newlines from text chunks.
-        process_document(document_path): Loads, chunks, embeds, and stores a document in the vector store.
+        process_documents(document_paths): Loads, chunks, embeds, and stores documents in the vector store.
         get_context(query): Retrieves relevant context from the vector store based on a query.
         reset(): Resets the vector store by deleting the content of the collection.
     """
 
     DEFAULT_MODEL: str = "llama3.2:1b"
+    COLLECTION_NAME: str = "uploaded_documents"
 
     def __init__(
         self,
@@ -74,16 +78,16 @@ class VectorStoreHandler:
         """
         logger.info("Initializing vector store...")
         model_kwargs = model_kwargs or dict()
-        self._embeddings: OllamaEmbeddings = OllamaEmbeddings(
-            model=(embeddings_model or self.DEFAULT_MODEL),
+        self._embeddings: OllamaEmbedding = OllamaEmbedding(
+            model_name=(embeddings_model or self.DEFAULT_MODEL),
             base_url=ollama_host,
             **model_kwargs,
         )
         logger.info("Embeddings model %s has been initialized.", embeddings_model)
-        self.vector_store: Chroma = Chroma(embedding_function=self._embeddings)
-        logger.info("Vector store has been initialized.")
-        self._splitter_params: dict[str, Any] = splitter_params or dict()
+        self._text_splitter = SentenceSplitter(**splitter_params)
         self._query_params: dict[str, Any] = query_params or dict()
+        self._vector_store: ChromaVectorStore = self._init_chroma()
+        logger.info("Vector store has been initialized.")
 
     @classmethod
     def from_config(cls, vector_store_config: dict[str, str]) -> "VectorStoreHandler":
@@ -99,30 +103,42 @@ class VectorStoreHandler:
         config: dict[str, Any] = vector_store_config.copy()
         return cls(**config)
 
+    def _init_chroma(self) -> ChromaVectorStore:
+        """Initializes the chroma vector store."""
+        client = chromadb.EphemeralClient()
+        collection = client.create_collection(self.COLLECTION_NAME)
+        return ChromaVectorStore(
+            client=client,
+            chroma_collection=collection,
+        )
+
     @staticmethod
     def _clean_chunks(chunks):
         """Removes newlines from text chunks."""
         for chunk in chunks:
             chunk.page_content = chunk.page_content.replace("\n", " ")
 
-    def process_document(self, document_path: str) -> None:
+    def process_documents(self, document_paths: list[str] | str) -> None:
         """
-        Loads, chunks, embeds, and stores a document in the vector store.
+        Loads, chunks, embeds, and stores documents in the vector store.
 
         Args:
-            document_path (str): The path to the document to be processed.
+            document_paths (list[str] | str): The path or list of paths to the documents to be processed.
         """
-        # Load and chunk the document
-        logger.info("Processing %s.", document_path)
-        loader: PyPDFLoader = PyPDFLoader(document_path)
-        logger.info("Document will be slit with parameters: %s", self._splitter_params)
+        if type(document_paths) == str:
+            document_paths = [document_paths]
 
-        text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(**self._splitter_params)
-        chunks: list[Document] = loader.load_and_split(text_splitter)
-        self._clean_chunks(chunks)
+        reader: SimpleDirectoryReader = SimpleDirectoryReader(
+            input_files=document_paths,
+        )
+        documents: list[Document] = reader.load_data()
+        nodes = self._text_splitter.get_nodes_from_documents(documents)
 
-        self.vector_store.add_documents(chunks)
-        logger.info("Vector store has been populated from %s.", document_path)
+        for node in nodes:
+            node.embedding = self._embeddings.get_text_embedding(node.text)
+
+        self._vector_store.add(nodes)
+        logger.info("Vector store has been populated from %s.", document_paths)
 
     def get_context(self, query: str) -> list[str]:
         """
@@ -134,8 +150,13 @@ class VectorStoreHandler:
         Returns:
             context (list[str]): A list of relevant text chunks from the stored documents.
         """
-        documents: list[Document] = self.vector_store.similarity_search(query, **self._query_params)
-        context: list[str] = [doc.page_content for doc in documents]
+        vector_store_query: VectorStoreQuery = VectorStoreQuery(
+            query_str=query,
+            query_embedding=self._embeddings.get_text_embedding(query),
+            **self._query_params,
+        )
+        query_results: VectorStoreQueryResult = self._vector_store.query(vector_store_query)
+        context: list[str] = [node.text for node in query_results.nodes]
         logger.info("Query %s returned %s", query, context)
         return context
 
@@ -143,9 +164,5 @@ class VectorStoreHandler:
         """
         Resets the vector store by deleting the content of the collection.
         """
-        # Get the list of ids in the collection
-        id_list = self.vector_store.get()["ids"]
-        # Delete all if the collection is not empty
-        if id_list:
-            self.vector_store.delete(id_list)
-            logger.info("Vector store has been reset.")
+        self._vector_store.clear()
+        logger.info("Vector store has been reset.")

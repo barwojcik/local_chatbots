@@ -125,10 +125,12 @@ def process_document() -> tuple[Response, int]:
                 400,
             )
 
-        for file in request.files.values():
-            file_path: str = file_handler.save_file(file)
-            vector_store.process_document(file_path)
-            file_handler.cleanup_file(file_path)
+        # Save uploaded files
+        file_paths: list[str] = file_handler.save_files(request.files.values())
+        # Process files and populate vector store with them
+        vector_store.process_documents(file_paths)
+        # Delete files after processing
+        file_handler.cleanup_files(file_paths)
 
         # Return a success message as JSON
         return (

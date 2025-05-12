@@ -14,16 +14,14 @@ MODEL = dict(
     model_name='llama3.2:1b'
 )
 VECTOR_STORE = dict(
-    embeddings_model="sentence-transformers/all-MiniLM-L6-v2",
-    model_kwargs=dict(
-        device="cuda:0",
-    ),
+    embeddings_model="llama3.2:3b",
+    ollama_host="http://localhost:11434",
     splitter_params=dict(
         chunk_size=1024,
         chunk_overlap=64,
     ),
     query_params=dict(
-        k=5,
+        similarity_top_k=5,
     ),
 )
 FILES = dict(
