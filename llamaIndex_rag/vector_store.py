@@ -114,6 +114,20 @@ class VectorStoreHandler:
         for chunk in chunks:
             chunk.page_content = chunk.page_content.replace("\n", " ")
 
+    @staticmethod
+    def _load_documents(document_paths: list[str]) -> list[Document]:
+        """Loads documents from a list of paths."""
+        reader: SimpleDirectoryReader = SimpleDirectoryReader(
+            input_files=document_paths,
+        )
+        return reader.load_data()
+
+    def _embed_nodes(self, nodes: list[BaseNode]) -> list[BaseNode]:
+        """Populates embedding field in given nodes."""
+        for node in nodes:
+            node.embedding = self._embeddings.get_text_embedding(node.text)
+        return nodes
+
     def process_documents(self, document_paths: list[str] | str) -> None:
         """
         Loads, chunks, embeds, and stores documents in the vector store.
@@ -124,14 +138,9 @@ class VectorStoreHandler:
         if type(document_paths) == str:
             document_paths = [document_paths]
 
-        reader: SimpleDirectoryReader = SimpleDirectoryReader(
-            input_files=document_paths,
-        )
-        documents: list[Document] = reader.load_data()
-        nodes = self._text_splitter.get_nodes_from_documents(documents)
-
-        for node in nodes:
-            node.embedding = self._embeddings.get_text_embedding(node.text)
+        documents: list[Document] = self._load_documents(document_paths)
+        nodes: list[BaseNode] = self._text_splitter.get_nodes_from_documents(documents)
+        nodes = self._embed_nodes(nodes)
 
         self._vector_store.add(nodes)
         logger.info("Vector store has been populated from %s.", document_paths)
