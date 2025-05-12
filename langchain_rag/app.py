@@ -119,15 +119,18 @@ def process_document() -> tuple[Response, int]:
                 jsonify(
                     {
                         "botResponse": "It seems like the file was not uploaded correctly, can you try "
-                                       "again. If the problem persists, try using a different file"
+                        "again. If the problem persists, try using a different file"
                     }
                 ),
                 400,
             )
 
-        file_paths: list[str] = [file_handler.save_file(file) for file in request.files.values()]
+        # Save uploaded files
+        file_paths: list[str] = file_handler.save_files(request.files.values())
+        # Process files and populate vector store with them
         vector_store.process_documents(file_paths)
-        _ = [file_handler.cleanup_file(file_path) for file_path in file_paths]
+        # Delete files after processing
+        file_handler.cleanup_files(file_paths)
 
         # Return a success message as JSON
         return (

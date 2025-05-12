@@ -14,7 +14,7 @@ file_handler.cleanup_file(file_path)
 """
 
 import os
-from typing import Any
+from typing import Any, Iterable
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures.file_storage import FileStorage
 import logging
@@ -36,7 +36,9 @@ class FileHandler:
     Methods:
         from_config (cls, config): Creates a new instance of the FileHandler class from a configuration dictionary.
         save_file: Save an uploaded file securely.
+        save_files: Save all uploaded files securely.
         cleanup_file: Remove a processed file from the upload directory.
+        cleanup_files: Remove all processed files from the upload directory.
     """
 
     def __init__(
@@ -112,6 +114,23 @@ class FileHandler:
         logger.info(f"File saved successfully at: {file_path}")
         return file_path
 
+    def save_files(self, file_list: Iterable[FileStorage]) -> list[str]:
+        """
+        Save an uploaded files securely.
+
+        Args:
+            file_list: List of the FileStorage objects from Flask request.
+
+        Returns:
+            file_paths: list of paths where the files were saved.
+
+        Raises:
+            ValueError: If the file is not allowed or does not exist.
+
+        """
+        file_paths: list[str] = [self.save_file(file) for file in file_list]
+        return file_paths
+
     @staticmethod
     def cleanup_file(file_path: str) -> None:
         """
@@ -126,3 +145,13 @@ class FileHandler:
                 logger.info(f"Cleaned up file: {file_path}")
         except Exception as e:
             logger.error(f"Error cleaning up file {file_path}: {str(e)}")
+
+    def cleanup_files(self, file_paths: list[str]) -> None:
+        """
+        Remove a processed file from the upload directory.
+
+        Args:
+            file_paths (str): List of paths to the files to be removed.
+        """
+        for file_path in file_paths:
+            self.cleanup_file(file_path)

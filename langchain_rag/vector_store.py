@@ -11,7 +11,7 @@ Example usage:
 from your_module import VectorStoreHandler
 
 handler = VectorStoreHandler()
-handler.process_document("path/to/your_document.pdf")
+handler.process_documents(["path/to/your_document.pdf"])
 context = handler.get_context("your search query")
 print(context) # Output: List of relevant text chunks
 
@@ -47,7 +47,7 @@ class VectorStoreHandler:
 
     Methods:
         clean_chunks(chunks): Removes newlines from text chunks.
-        process_documents(document_path): Loads, chunks, embeds, and stores documents in the vector store.
+        process_documents(document_paths): Loads, chunks, embeds, and stores documents in the vector store.
         get_context(query): Retrieves relevant context from the vector store based on a query.
         reset(): Resets the vector store by deleting the content of the collection.
     """
