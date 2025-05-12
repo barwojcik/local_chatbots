@@ -67,7 +67,7 @@ class VectorStoreHandler:
         Args:
             embeddings_model (str, optional): The identifier of the Hugging Face embeddings model.
                 Defaults to "sentence-transformers/all-MiniLM-L6-v2".
-            model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embeddings model.
+            model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embedding model.
                 If not provided, defaults to {"device": "cuda:0"} if CUDA is available, otherwise to {"device": "cpu"}.
             splitter_params (dict[str, Any], optional): Additional parameters for the text splitter.
             query_params (dict[str, Any], optional): Additional parameters for the similarity search query.

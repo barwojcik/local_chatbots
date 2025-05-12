@@ -68,7 +68,7 @@ class VectorStoreHandler:
 
         Args:
             embeddings_model (str, optional): The identifier of the Ollama embeddings model. Default "llama3.2:1b".
-            model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embeddings model.
+            model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embedding model.
             splitter_params (dict[str, Any], optional): Additional parameters for the text splitter.
             query_params (dict[str, Any], optional): Additional parameters for the similarity search query.
         """
