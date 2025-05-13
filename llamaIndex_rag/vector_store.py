@@ -170,5 +170,8 @@ class VectorStoreHandler:
 
     def reset(self):
         """Resets the vector store by deleting the content of the collection."""
-        self._vector_store.clear()
-        logger.info("Vector store has been reset.")
+        try:
+            self._vector_store.clear()
+            logger.info("Vector store has been reset.")
+        except ValueError as e:
+            logger.error("Error while resetting the vector store: %s", e)
