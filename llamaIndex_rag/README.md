@@ -1,4 +1,4 @@
-# LangChain RAG (Retrieval-Augmented Generation)
+# LlamaIndex RAG (Retrieval-Augmented Generation)
 
 [![Python 3.10.12](https://img.shields.io/badge/python-3.10.12-blue.svg)](https://www.python.org/downloads/release/python-31012/)
 [![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)](https://flask.palletsprojects.com/)
@@ -30,7 +30,7 @@ A powerful RAG-based chatbot application that enhances Large Language Model (LLM
 1. Clone the repository:
    ```bash
    git clone https://github.com/barwojcik/local_chatbots.git
-   cd langchian_rag
+   cd llamaIndex_rag
    ```
 
 2. Create and activate virtual environment:
@@ -48,14 +48,14 @@ A powerful RAG-based chatbot application that enhances Large Language Model (LLM
 
 1. Build the Docker image:
    ```bash
-   docker build -t langchain-rag .
+   docker build -t llamaindex-rag .
    ```
 
 2. Run the container:
    ```bash
-   docker run --name langchain-rag \
+   docker run --name llamaindex-rag \
        --network host \
-       langchain-rag
+       llamaindex-rag
    ```
 
 ## Usage
@@ -71,14 +71,12 @@ A powerful RAG-based chatbot application that enhances Large Language Model (LLM
    ```
    alternatively, start docker container
    ```bash
-   docker start langchain-rag
+   docker start llamaindex-rag
    ```
 
 3. Open your web browser and navigate to `http://localhost:5000`
 
-4. Upload documents through the web interface to create the knowledge base
-
-5. Start chatting with the RAG-enhanced model
+4. Start chatting
 
 ## File Structure
 
