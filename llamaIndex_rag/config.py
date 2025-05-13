@@ -9,13 +9,15 @@ import logging
 DEBUG = False
 TESTING = False
 LOG_LEVEL = logging.INFO
+MODEL_NAME = "llama3.2:3b"
+OLLAMA_HOST = "http://localhost:11434"
 MODEL = dict(
-    ollama_host='http://localhost:11434',
-    model_name='llama3.2:1b'
+    ollama_host=OLLAMA_HOST,
+    model_name=MODEL_NAME,
 )
 VECTOR_STORE = dict(
-    embeddings_model="llama3.2:3b",
-    ollama_host="http://localhost:11434",
+    embeddings_model=MODEL_NAME,
+    ollama_host=OLLAMA_HOST,
     splitter_params=dict(
         chunk_size=1024,
         chunk_overlap=64,

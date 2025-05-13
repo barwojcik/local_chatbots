@@ -12,7 +12,6 @@ for cross-origin requests. It also includes basic logging for monitoring and deb
 from flask import Flask, render_template, request, jsonify
 from flask.wrappers import Response
 from flask_cors import CORS
-from werkzeug.datastructures.file_storage import FileStorage
 from model import RAGOllamaModelHandler
 from file_handler import FileHandler
 from vector_store import VectorStoreHandler
