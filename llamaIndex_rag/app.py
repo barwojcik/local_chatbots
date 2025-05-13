@@ -54,15 +54,7 @@ def messages_route() -> tuple[Response, int]:
 def get_messages() -> tuple[Response, int]:
     """Get the chat history."""
     try:
-        return (
-            jsonify(
-                {
-                    "status": "success",
-                    "messages": model.get_history(),
-                }
-            ),
-            200,
-        )
+        return jsonify({"status": "success", "messages": model.get_history()}), 200
     except Exception as e:
         app.logger.error("Error when getting chat history: %s", e)
         return (
@@ -136,18 +128,24 @@ def process_document() -> tuple[Response, int]:
         return (
             jsonify(
                 {
-                    "botResponse": "Thank you for providing your PDF document. I have analyzed it, so now you can ask me any "
-                    "questions regarding it!"
+                    "botResponse": "Thank you for providing your PDF document. I have analyzed it, "
+                    "so now you can ask me any questions regarding it!"
                 }
             ),
             200,
         )
     except ValueError as e:
         app.logger.error("Error processing document: %s", e)
-        return jsonify({"botResponse": f"An error occurred while processing your document: {e}"}), 400
+        return (
+            jsonify({"botResponse": f"An error occurred while processing your document: {e}"}),
+            400,
+        )
     except Exception as e:
         app.logger.error("Error processing document: %s", e)
-        return jsonify({"botResponse": f"An error occurred while processing your document: {e}"}), 500
+        return (
+            jsonify({"botResponse": f"An error occurred while processing your document: {e}"}),
+            500,
+        )
 
 
 # Define the route for resetting the vector store
@@ -157,26 +155,10 @@ def reset_vector_store() -> tuple[Response, int]:
     try:
         vector_store.reset()
         app.logger.info("Vector store cleared.")
-        return (
-            jsonify(
-                {
-                    "status": "success",
-                    "message": "Vector store cleared",
-                }
-            ),
-            200,
-        )
+        return jsonify({"status": "success", "message": "Vector store cleared"}), 200
     except Exception as e:
         app.logger.error("Error resetting vector store: %s", e)
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "message": f"Error resetting vector store: {e}",
-                }
-            ),
-            500,
-        )
+        return jsonify({"status": "error", "message": f"Error resetting vector store: {e}"}), 500
 
 
 # Define the route for resetting model chat history
@@ -186,26 +168,10 @@ def reset_chat_history() -> tuple[Response, int]:
     try:
         model.clear_history()
         app.logger.info("Bot chat history cleared.")
-        return (
-            jsonify(
-                {
-                    "status": "success",
-                    "message": "Chat history cleared",
-                }
-            ),
-            200,
-        )
+        return jsonify({"status": "success", "message": "Chat history cleared"}), 200
     except Exception as e:
         app.logger.error("Error resetting chat history: %s", e)
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "message": f"Error resetting chat history: {e}",
-                }
-            ),
-            500,
-        )
+        return jsonify({"status": "error", "message": f"Error resetting chat history: {e}"}), 500
 
 
 @app.route("/model", methods=["GET", "POST"])
@@ -261,13 +227,16 @@ def process_set_model() -> tuple[Response, int]:
     try:
         model_name = request.json["model"]
         app.logger.info("Setting model to %s", model_name)
+
         if model.set_model(model_name):
             return jsonify({"success": True}), 200
-        else:
-            return jsonify({"success": False, "error": "Invalid model name"}), 400
+
+        return jsonify({"success": False, "error": "Invalid model name"}), 400
+
     except KeyError as e:
         app.logger.error("Missing key in request data: %s", e)
         return jsonify({"error": f"Missing required field: {str(e)}"}), 400
+
     except Exception as e:
         app.logger.error("Error processing message: %s", e)
         return jsonify({"error": "Internal server error"}), 500

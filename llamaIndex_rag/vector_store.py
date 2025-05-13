@@ -22,7 +22,7 @@ from typing import Any, Optional
 
 import chromadb
 from llama_index.core import SimpleDirectoryReader
-from llama_index.core.schema import Document, BaseNode, TextNode
+from llama_index.core.schema import Document, BaseNode
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.vector_stores.types import VectorStoreQuery, VectorStoreQueryResult
 from llama_index.embeddings.ollama import OllamaEmbedding
@@ -91,10 +91,12 @@ class VectorStoreHandler:
         Creates a new instance of the VectorStoreHandler class from a configuration dictionary.
 
         Args:
-            vector_store_config (dict[str, str]): A dictionary containing the configuration parameters for the vector store.
+            vector_store_config (dict[str, str]): A dictionary containing the configuration parameters for
+                the vector store.
 
         Returns:
-            VectorStoreHandler: A new instance of the VectorStoreHandler class initialized with the provided configuration.
+            VectorStoreHandler: A new instance of the VectorStoreHandler class initialized with the provided
+                configuration.
         """
         config: dict[str, Any] = vector_store_config.copy()
         return cls(**config)
@@ -135,7 +137,7 @@ class VectorStoreHandler:
         Args:
             document_paths (list[str] | str): The path or list of paths to the documents to be processed.
         """
-        if type(document_paths) == str:
+        if isinstance(document_paths, str):
             document_paths = [document_paths]
 
         documents: list[Document] = self._load_documents(document_paths)
@@ -166,8 +168,6 @@ class VectorStoreHandler:
         return context
 
     def reset(self):
-        """
-        Resets the vector store by deleting the content of the collection.
-        """
+        """Resets the vector store by deleting the content of the collection."""
         self._vector_store.clear()
         logger.info("Vector store has been reset.")

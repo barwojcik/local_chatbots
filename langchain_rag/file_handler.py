@@ -14,10 +14,10 @@ file_handler.cleanup_file(file_path)
 """
 
 import os
-from typing import Any, Iterable
-from werkzeug.utils import secure_filename
-from werkzeug.datastructures.file_storage import FileStorage
 import logging
+from typing import Any, Iterable
+from werkzeug.datastructures.file_storage import FileStorage
+from werkzeug.utils import secure_filename
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +111,7 @@ class FileHandler:
         filename = secure_filename(file.filename)
         file_path = os.path.join(self.upload_folder, filename)
         file.save(file_path)
-        logger.info(f"File saved successfully at: {file_path}")
+        logger.info(f"File saved successfully at: %s", file_path)
         return file_path
 
     def save_files(self, file_list: Iterable[FileStorage]) -> list[str]:
@@ -142,9 +142,9 @@ class FileHandler:
         try:
             if os.path.exists(file_path):
                 os.remove(file_path)
-                logger.info(f"Cleaned up file: {file_path}")
+                logger.info(f"Cleaned up file: %s", file_path)
         except Exception as e:
-            logger.error(f"Error cleaning up file {file_path}: {str(e)}")
+            logger.error(f"Error cleaning up file %s: %s", file_path, e)
 
     def cleanup_files(self, file_paths: list[str]) -> None:
         """

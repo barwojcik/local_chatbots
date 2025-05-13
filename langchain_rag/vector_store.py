@@ -35,9 +35,6 @@ class VectorStoreHandler:
     This class uses LangChain for document loading and chunking, Ollama for embeddings,
     and Chroma as the vector database.
 
-    Attributes:
-        vector_store (Chroma): The vector store used to store and manage document embeddings.
-
     Args:
         embeddings_model (str, optional): The identifier of the Ollama embeddings model. Default "llama3.2:1b".
         ollama_host (str, optional): The hostname of the Ollama.
@@ -91,10 +88,12 @@ class VectorStoreHandler:
         Creates a new instance of the VectorStoreHandler class from a configuration dictionary.
 
         Args:
-            vector_store_config (dict[str, str]): A dictionary containing the configuration parameters for the vector store.
+            vector_store_config (dict[str, str]): A dictionary containing the configuration parameters for
+                the vector store.
 
         Returns:
-            VectorStoreHandler: A new instance of the VectorStoreHandler class initialized with the provided configuration.
+            VectorStoreHandler: A new instance of the VectorStoreHandler class initialized with the provided
+                configuration.
         """
         config: dict[str, Any] = vector_store_config.copy()
         return cls(**config)
@@ -131,7 +130,7 @@ class VectorStoreHandler:
         Args:
             document_paths (list[str] | str): The path or list of paths to the documents to be processed.
         """
-        if type(document_paths) == str:
+        if isinstance(document_paths, str):
             document_paths = [document_paths]
 
         for document_path in document_paths:
@@ -153,9 +152,7 @@ class VectorStoreHandler:
         return context
 
     def reset(self):
-        """
-        Resets the vector store by deleting the content of the collection.
-        """
+        """Resets the vector store by deleting the content of the collection."""
         # Get the list of ids in the collection
         id_list = self.vector_store.get()["ids"]
         # Delete all if the collection is not empty

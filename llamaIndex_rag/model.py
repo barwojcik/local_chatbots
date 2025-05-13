@@ -85,6 +85,16 @@ class RAGOllamaModelHandler:
         return cls(**config)
 
     def _init_model(self) -> bool:
+        """
+        Initializes the model based on the provided self._model_name.
+
+        Checks if the specified model is available and returns a boolean value
+        indicating its availability. If the default model is used, it logs a warning
+        message and then checks for its availability.
+
+        Returns:
+            bool: True if the model is successfully initialized, False otherwise
+        """
         if self.is_model_available(self._model_name):
             return True
 
@@ -143,7 +153,18 @@ class RAGOllamaModelHandler:
         return True
 
     def is_model_available(self, model_name: str) -> bool:
-        """Check if a specified model is available."""
+        """
+        Check if a specified model is available.
+
+        Checks the list of available models and attempts to pull the model from the repository
+        if it's not found.
+
+        Args:
+            model_name (str): The name of the model to be checked.
+
+        Returns:
+            bool: True if the model is found or successfully pulled, False otherwise
+        """
         available_model_names: list[str] = self.get_available_model_names()
         if model_name in available_model_names:
             logger.info("Model %s found in available models", model_name)
@@ -159,7 +180,17 @@ class RAGOllamaModelHandler:
             return False
 
     def set_model(self, model_name: str) -> bool:
-        """Set the active model for chat responses generation."""
+        """
+        Set the active model for chat responses generation.
+
+        Sets the model based on the provided model_name and logs an information message.
+
+        Args:
+            model_name (str): The name of the model to be used for chat responses generation.
+
+        Returns:
+            bool: True if the model is successfully set, False otherwise
+        """
         if not self.is_model_available(model_name):
             return False
 
@@ -213,12 +244,17 @@ class RAGOllamaModelHandler:
 
         Args:
             prompt (dict): The prompt to be added to the chat history.
-
         """
         self._chat_history.append(prompt)
         logger.info("%s has been added to chat history.", prompt)
 
     def get_history(self) -> list[dict[str, str]]:
+        """
+        Retrieves the chat history entries.
+
+        Returns:
+            list[dict[str, str]]: A list of dictionaries containing 'role' and 'content' keys.
+        """
         allowed_keys: list[str] = ["role", "content"]
         message_history: list[dict[str, str]] = list(self._chat_history)
         message_history = [{k: v for k, v in msg.items() if k in allowed_keys} for msg in message_history]
@@ -243,6 +279,7 @@ class RAGOllamaModelHandler:
         else:
             prompt: dict[str, str] = self._preprocess_prompt(prompt_text)
         self._add_to_history(prompt)
+
         try:
             ollama_response: ChatResponse = self._client.chat(
                 model=self._model_name,
@@ -250,9 +287,9 @@ class RAGOllamaModelHandler:
                 stream=False,
                 **self._chat_kwargs,
             )
-
             logger.debug("Ollama response: %s", ollama_response)
             self._add_to_history(dict(ollama_response.message))
+
             return ollama_response.message.content
         except Exception as e:
             logger.error("Error during text generation: %s", e)
