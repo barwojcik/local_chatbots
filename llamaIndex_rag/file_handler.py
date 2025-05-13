@@ -41,6 +41,8 @@ class FileHandler:
         cleanup_files: Remove all processed files from the upload directory.
     """
 
+    DEFAULT_EXTENSIONS: set[str] = {"csv", "docx", "epub", "hwp", "ipynb", "mbox", "md", "pdf"}
+
     def __init__(
         self,
         upload_folder: str = "uploads",
@@ -54,7 +56,10 @@ class FileHandler:
             extensions (list[str]): List of allowed file extensions (default: ['pdf'])
         """
         self.upload_folder = upload_folder
-        self._allowed_extensions = {*extensions} or {"pdf"}
+        if extensions is not None:
+            self._allowed_extensions = {*extensions}
+        else:
+            self._allowed_extensions = self.DEFAULT_EXTENSIONS
         self._create_upload_directory()
 
     @classmethod
@@ -90,7 +95,7 @@ class FileHandler:
         if not "." in filename:
             raise ValueError("Invalid file extension.")
 
-        if not filename.lower().endswith(tuple(*self._allowed_extensions)):
+        if not filename.lower().endswith(tuple(self._allowed_extensions)):
             raise ValueError("File extension not allowed.")
 
     def save_file(self, file: FileStorage) -> str:
@@ -108,8 +113,8 @@ class FileHandler:
 
         """
         self._allowed_file(file.filename)
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(self.upload_folder, filename)
+        filename: str = secure_filename(file.filename)
+        file_path: str = os.path.join(self.upload_folder, filename)
         file.save(file_path)
         logger.info(f"File saved successfully at: %s", file_path)
         return file_path

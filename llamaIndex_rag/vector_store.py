@@ -54,6 +54,7 @@ class VectorStoreHandler:
 
     DEFAULT_MODEL: str = "llama3.2:1b"
     COLLECTION_NAME: str = "uploaded_documents"
+    DEFAULT_EXTENSIONS: set[str] = {"csv", "docx", "epub", "hwp", "ipynb", "mbox", "md", "pdf"}
 
     def __init__(
         self,
@@ -103,8 +104,8 @@ class VectorStoreHandler:
 
     def _init_chroma(self) -> ChromaVectorStore:
         """Initializes the chroma vector store."""
-        client = chromadb.EphemeralClient()
-        collection = client.create_collection(self.COLLECTION_NAME)
+        client: chromadb.EphemeralClient = chromadb.EphemeralClient()
+        collection: chromadb.Collection = client.create_collection(self.COLLECTION_NAME)
         return ChromaVectorStore(
             client=client,
             chroma_collection=collection,
@@ -116,11 +117,11 @@ class VectorStoreHandler:
         for chunk in chunks:
             chunk.page_content = chunk.page_content.replace("\n", " ")
 
-    @staticmethod
-    def _load_documents(document_paths: list[str]) -> list[Document]:
+    def _load_documents(self, document_paths: list[str]) -> list[Document]:
         """Loads documents from a list of paths."""
         reader: SimpleDirectoryReader = SimpleDirectoryReader(
             input_files=document_paths,
+            required_exts=list(self.DEFAULT_EXTENSIONS),
         )
         return reader.load_data()
 

@@ -57,14 +57,7 @@ def get_messages() -> tuple[Response, int]:
         return jsonify({"status": "success", "messages": model.get_history()}), 200
     except Exception as e:
         app.logger.error("Error when getting chat history: %s", e)
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                }
-            ),
-            500,
-        )
+        return jsonify({"status": "error"}), 500
 
 
 def process_message() -> tuple[Response, int]:
@@ -128,7 +121,7 @@ def process_document() -> tuple[Response, int]:
         return (
             jsonify(
                 {
-                    "botResponse": "Thank you for providing your PDF document. I have analyzed it, "
+                    "botResponse": "Thank you for providing your document. I have analyzed it, "
                     "so now you can ask me any questions regarding it!"
                 }
             ),

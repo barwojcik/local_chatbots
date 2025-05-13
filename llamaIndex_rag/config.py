@@ -26,5 +26,4 @@ VECTOR_STORE = dict(
 )
 FILES = dict(
     upload_folder="uploads",
-    extensions=["pdf"],
 )

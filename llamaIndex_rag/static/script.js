@@ -358,15 +358,23 @@ $(document).ready(() => {
             await showBotLoadingAnimation();
 
             const formData = new FormData();
-            let i = 1;
+            let i = 0;
             for (const file of this.files) { // Accessing files directly from this.files
-                if (file.type.includes('pdf')) {
-                    formData.append(`file${i}`, file);
+                console.log(file.type)
+                if (file.type.includes('csv') ||
+                    file.type.includes('docx') ||
+                    file.type.includes('epub') ||
+                    file.type.includes('hwp') ||
+                    file.type.includes('ipynb') ||
+                    file.type.includes('mbox') ||
+                    file.type.includes('markdown') ||
+                    file.type.includes('pdf')) {
                     i++;
+                    formData.append(`file${i}`, file);
                 }
             }
 
-            if (formData.length === 0) {
+            if (i < 1) {
                 throw new Error("Please select at least one valid file");
             }
 
