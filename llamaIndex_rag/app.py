@@ -9,6 +9,7 @@ The application is designed to be accessible through a web interface and utilize
 for cross-origin requests. It also includes basic logging for monitoring and debugging.
 """
 
+import logging
 from flask import Flask, render_template, request, jsonify
 from flask.wrappers import Response
 from flask_cors import CORS
@@ -22,7 +23,7 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 app.config.from_object("config")
 cfg = app.config
-app.logger.setLevel(cfg["LOG_LEVEL"])
+logging.basicConfig(level=cfg["LOG_LEVEL"])
 
 model: RAGOllamaModelHandler = (
     RAGOllamaModelHandler.from_config(cfg["MODEL"]) if "MODEL" in cfg else RAGOllamaModelHandler()
