@@ -33,5 +33,10 @@ A collection of Flask-based applications powered by Large Language Models (LLMs)
 - Enables context-aware responses using document retrieval
 - Supports local document processing
 
+#### Multi-Agent RAG
+- Built using `ollama` and `langchain` libraries
+- Coordinates specialized agents (router, query analyzer, retriever, synthesizer) to decide when to retrieve, refine queries, fetch relevant context, and generate answers
+- Supports hybrid retrieval (semantic + keyword) with re-ranking and source citations
+
 ## Usage
 Each application can be run from its respective directory.
