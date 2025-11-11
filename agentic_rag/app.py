@@ -75,14 +75,6 @@ def index() -> str:
     return render_template("index.html")  # Render the index.html template
 
 
-# Define the route for processing messages
-@app.route("/messages", methods=["GET", "POST"])
-def messages_route() -> tuple[Response, int]:
-    if request.method == "GET":
-        return get_messages()
-    return process_message()
-
-
 def get_messages() -> tuple[Response, int]:
     """Get the chat history."""
     try:
@@ -194,28 +186,6 @@ def process_message_with_streaming(user_message: str, progress_queue: queue.Queu
         progress_queue.put({"type": "error", "message": str(e)})
         return None
 
-
-def process_message() -> tuple[Response, int]:
-    """
-    Legacy endpoint - redirects to streaming endpoint.
-    Kept for backward compatibility but new clients should use /messages/stream.
-    """
-    try:
-        user_message: str = request.json["userMessage"]
-        app.logger.warning(
-            "Legacy /messages POST endpoint used, consider migrating to /messages/stream"
-        )
-
-        # For backward compatibility, redirect to streaming
-        return (
-            jsonify(
-                {
-                    "error": "Please use /messages/stream endpoint for real-time updates",
-                    "legacy": True,
-                }
-            ),
-            400,
-        )
 
     except KeyError:
         app.logger.error('Missing "userMessage" key in request data.')
