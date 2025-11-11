@@ -8,37 +8,30 @@ import logging
 
 DEBUG = False
 TESTING = False
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.INFO
 MODEL_NAME = "llama3.2:3b"
 OLLAMA_HOST = "http://localhost:11434"
 
 # Multi-agent system configuration
+# Note: All agents share the same OllamaModelHandler instance configured by MODEL_NAME and OLLAMA_HOST
 AGENTS = dict(
     # Router agent determines if RAG retrieval is needed
     router=dict(
-        model_name=MODEL_NAME,
-        ollama_host=OLLAMA_HOST,
         confidence_threshold=0.7,
     ),
     # Query analyzer enhances queries for better retrieval
     query_analyzer=dict(
-        model_name=MODEL_NAME,
-        ollama_host=OLLAMA_HOST,
         generate_variations=True,
         max_variations=2,
     ),
     # Retriever agent handles document retrieval
     retriever=dict(
-        model_name=MODEL_NAME,
-        ollama_host=OLLAMA_HOST,
-        strategies=["semantic", "hybrid"],
+        strategies=["semantic"],
         enable_reranking=True,
         max_results=5,
     ),
     # Synthesizer agent generates final responses
     synthesizer=dict(
-        model_name=MODEL_NAME,
-        ollama_host=OLLAMA_HOST,
         include_citations=True,
         max_context_chunks=5,
     ),

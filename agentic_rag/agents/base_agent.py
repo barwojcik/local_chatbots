@@ -8,7 +8,7 @@ and functionality for all specialized agents.
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Optional
-from ollama import Client, ChatResponse
+from model import OllamaModelHandler
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +18,11 @@ class BaseAgent(ABC):
     Abstract base class for all agents in the multi-agent system.
 
     Args:
-        model_name (str): The identifier of the Ollama model to use.
-        ollama_host (str, optional): The host of the Ollama service.
+        model_handler (OllamaModelHandler, optional): Instance of OllamaModelHandler to use.
+        model_name (str, optional): The identifier of the Ollama model to use (if model_handler not provided).
+        ollama_host (str, optional): The host of the Ollama service (if model_handler not provided).
         system_prompt (str, optional): System prompt to guide agent behavior.
-        chat_kwargs (dict[str, Any], optional): Additional keyword arguments for chat.
+        chat_kwargs (dict[str, Any], optional): Additional keyword arguments for chat (if model_handler not provided).
 
     Methods:
         from_config: Creates a new instance from a configuration dictionary.
@@ -32,6 +33,7 @@ class BaseAgent(ABC):
 
     def __init__(
         self,
+        model_handler: Optional[OllamaModelHandler] = None,
         model_name: Optional[str] = None,
         ollama_host: Optional[str] = None,
         system_prompt: Optional[str] = None,
@@ -41,15 +43,21 @@ class BaseAgent(ABC):
         Initializes the BaseAgent with the specified model and parameters.
 
         Args:
-            model_name: The identifier of the Ollama model to use.
-            ollama_host: The host of the Ollama service.
+            model_handler: Instance of OllamaModelHandler to use.
+            model_name: The identifier of the Ollama model to use (if model_handler not provided).
+            ollama_host: The host of the Ollama service (if model_handler not provided).
             system_prompt: System prompt to guide agent behavior.
-            chat_kwargs: Additional keyword arguments for chat.
+            chat_kwargs: Additional keyword arguments for chat (if model_handler not provided).
         """
-        self._model_name: str = model_name or self.DEFAULT_MODEL
-        self._client: Client = Client(host=ollama_host)
+        if model_handler is not None:
+            self._model_handler = model_handler
+        else:
+            self._model_handler = OllamaModelHandler(
+                model_name=model_name or self.DEFAULT_MODEL,
+                ollama_host=ollama_host,
+                chat_kwargs=chat_kwargs,
+            )
         self._system_prompt: Optional[str] = system_prompt
-        self._chat_kwargs: dict[str, Any] = chat_kwargs or {}
 
     @classmethod
     def from_config(cls, agent_config: dict[str, Any]) -> "BaseAgent":
@@ -76,14 +84,9 @@ class BaseAgent(ABC):
             str: The model's response content.
         """
         try:
-            response: ChatResponse = self._client.chat(
-                model=self._model_name,
-                messages=messages,
-                stream=False,
-                **self._chat_kwargs,
-            )
+            response = self._model_handler.predict(messages)
             logger.debug("Agent %s received response: %s", self.__class__.__name__, response)
-            return response.message.content
+            return response
         except Exception as e:
             logger.error("Error in agent %s: %s", self.__class__.__name__, e)
             raise

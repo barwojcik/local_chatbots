@@ -92,7 +92,7 @@ class FileHandler:
         if not filename:
             raise ValueError("No file provided.")
 
-        if not "." in filename:
+        if "." not in filename:
             raise ValueError("Invalid file extension.")
 
         if not filename.lower().endswith(tuple(self._allowed_extensions)):

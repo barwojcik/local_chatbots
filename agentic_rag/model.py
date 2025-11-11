@@ -22,7 +22,7 @@ from ollama import Client, ListResponse, ChatResponse
 logger = logging.getLogger(__name__)
 
 
-class RAGOllamaModelHandler:
+class OllamaModelHandler:
     """
     Handles interactions with the Ollama service.
 
@@ -72,14 +72,14 @@ class RAGOllamaModelHandler:
             self._is_model_initialized = self._init_model()
 
     @classmethod
-    def from_config(cls, model_config: dict[str, Any]) -> "RAGOllamaModelHandler":
+    def from_config(cls, model_config: dict[str, Any]) -> "OllamaModelHandler":
         """Creates a new instance of the RAGOllamaModelHandler class from a configuration dictionary.
 
         Args:
             model_config: Configuration dictionary containing model settings.
 
         Returns:
-            RAGOllamaModelHandler: New instance configured with the provided settings.
+            OllamaModelHandler: New instance configured with the provided settings.
         """
         config: dict[str, Any] = model_config.copy()
         return cls(**config)
@@ -207,7 +207,7 @@ class RAGOllamaModelHandler:
         }
         return prompt
 
-    def _add_to_history(self, prompt: dict[str, str]) -> None:
+    def add_to_history(self, prompt: dict[str, str]) -> None:
         """
         Adds a prompt to the chat history.
 
@@ -226,13 +226,12 @@ class RAGOllamaModelHandler:
         ]
         return message_history
 
-    def predict(self, prompt_text: str, context: list[str] = None) -> str:
+    def predict(self, messages: list[dict[str, str]]) -> str:
         """
-        Generates text based on the prompt and chat history.
+        Generates text based on provided messages without affecting chat history.
 
         Args:
-            prompt_text (str): The prompt text.
-            context (list[str]): A list of strings representing the external context.
+            messages (list[dict[str, str]]): List of message dictionaries with 'role' and 'content' keys.
 
         Returns:
             str: The generated text.
@@ -240,21 +239,15 @@ class RAGOllamaModelHandler:
         if not self._is_model_initialized:
             self._init_model()
 
-        if context:
-            prompt: dict[str, str] = self._preprocess_rag_prompt(prompt_text, context)
-        else:
-            prompt: dict[str, str] = self._preprocess_prompt(prompt_text)
-        self._add_to_history(prompt)
         try:
             ollama_response: ChatResponse = self._client.chat(
                 model=self._model_name,
-                messages=list(self._chat_history),
+                messages=messages,
                 stream=False,
                 **self._chat_kwargs,
             )
 
             logger.debug("Ollama response: %s", ollama_response)
-            self._add_to_history(dict(ollama_response.message))
             return ollama_response.message.content
         except Exception as e:
             logger.error("Error during text generation: %s", e)

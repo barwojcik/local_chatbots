@@ -64,6 +64,7 @@ class SynthesizerAgent(BaseAgent):
 
     def __init__(
         self,
+        model_handler=None,
         model_name: Optional[str] = None,
         ollama_host: Optional[str] = None,
         include_citations: bool = True,
@@ -75,12 +76,13 @@ class SynthesizerAgent(BaseAgent):
         Initializes the SynthesizerAgent with specified parameters.
 
         Args:
-            model_name: The identifier of the Ollama model to use.
-            ollama_host: The host of the Ollama service.
+            model_handler: Instance of OllamaModelHandler to use.
+            model_name: The identifier of the Ollama model to use (if model_handler not provided).
+            ollama_host: The host of the Ollama service (if model_handler not provided).
             include_citations: Whether to include citations in responses.
             max_context_chunks: Maximum number of context chunks to use.
             system_prompt: Custom system prompt (uses default if None).
-            chat_kwargs: Additional keyword arguments for chat.
+            chat_kwargs: Additional keyword arguments for chat (if model_handler not provided).
         """
         # Choose system prompt based on citation preference
         if system_prompt is None:
@@ -89,6 +91,7 @@ class SynthesizerAgent(BaseAgent):
             )
 
         super().__init__(
+            model_handler=model_handler,
             model_name=model_name,
             ollama_host=ollama_host,
             system_prompt=system_prompt,

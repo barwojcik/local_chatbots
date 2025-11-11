@@ -48,6 +48,7 @@ class RetrieverAgent(BaseAgent):
 
     def __init__(
         self,
+        model_handler=None,
         model_name: Optional[str] = None,
         ollama_host: Optional[str] = None,
         strategies: Optional[list[str]] = None,
@@ -60,15 +61,17 @@ class RetrieverAgent(BaseAgent):
         Initializes the RetrieverAgent with specified parameters.
 
         Args:
-            model_name: The identifier of the Ollama model to use.
-            ollama_host: The host of the Ollama service.
+            model_handler: Instance of OllamaModelHandler to use.
+            model_name: The identifier of the Ollama model to use (if model_handler not provided).
+            ollama_host: The host of the Ollama service (if model_handler not provided).
             strategies: List of retrieval strategies to use.
             enable_reranking: Whether to re-rank retrieved documents.
             max_results: Maximum number of results to return.
             system_prompt: Custom system prompt (uses default if None).
-            chat_kwargs: Additional keyword arguments for chat.
+            chat_kwargs: Additional keyword arguments for chat (if model_handler not provided).
         """
         super().__init__(
+            model_handler=model_handler,
             model_name=model_name,
             ollama_host=ollama_host,
             system_prompt=system_prompt,

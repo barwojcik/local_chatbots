@@ -1,7 +1,7 @@
 """
-LangChain RAG with Ollama using Flask.
+LangChain Multi-Agent RAG with Ollama using Flask.
 
-This module defines a RAG application using a Large Language Model (LLM)
+This module defines a Multi-Agent RAG application using a Large Language Model (LLM)
 and the Flask framework. It handles user messages, sends them to the LLM for processing,
 and returns the chatbot's response.
 
@@ -16,7 +16,7 @@ import threading
 from flask import Flask, render_template, request, jsonify, stream_with_context
 from flask.wrappers import Response
 from flask_cors import CORS
-from model import RAGOllamaModelHandler
+from model import OllamaModelHandler
 from file_handler import FileHandler
 from vector_store import VectorStoreHandler
 from agents import RouterAgent, QueryAnalyzerAgent, RetrieverAgent, SynthesizerAgent
@@ -29,8 +29,10 @@ app.config.from_object("config")
 cfg = app.config
 logging.basicConfig(level=cfg["LOG_LEVEL"])
 
-model: RAGOllamaModelHandler = (
-    RAGOllamaModelHandler.from_config(cfg["MODEL"]) if "MODEL" in cfg else RAGOllamaModelHandler()
+# Initialize shared model handler
+model: OllamaModelHandler = OllamaModelHandler(
+    model_name=cfg.get("MODEL_NAME"),
+    ollama_host=cfg.get("OLLAMA_HOST"),
 )
 
 vector_store: VectorStoreHandler = (
@@ -43,30 +45,26 @@ file_handler: FileHandler = (
     FileHandler.from_config(cfg["FILES"]) if "FILES" in cfg else FileHandler()
 )
 
-# Initialize agents
-router_agent: RouterAgent = (
-    RouterAgent.from_config(cfg["AGENTS"]["router"])
-    if "AGENTS" in cfg and "router" in cfg["AGENTS"]
-    else RouterAgent()
+# Initialize agents with shared model handler
+router_agent: RouterAgent = RouterAgent(
+    model_handler=model,
+    **cfg["AGENTS"]["router"] if "AGENTS" in cfg and "router" in cfg["AGENTS"] else {}
 )
 
-query_analyzer_agent: QueryAnalyzerAgent = (
-    QueryAnalyzerAgent.from_config(cfg["AGENTS"]["query_analyzer"])
-    if "AGENTS" in cfg and "query_analyzer" in cfg["AGENTS"]
-    else QueryAnalyzerAgent()
+query_analyzer_agent: QueryAnalyzerAgent = QueryAnalyzerAgent(
+    model_handler=model,
+    **cfg["AGENTS"]["query_analyzer"] if "AGENTS" in cfg and "query_analyzer" in cfg["AGENTS"] else {}
 )
 
-retriever_agent: RetrieverAgent = (
-    RetrieverAgent.from_config(cfg["AGENTS"]["retriever"])
-    if "AGENTS" in cfg and "retriever" in cfg["AGENTS"]
-    else RetrieverAgent()
+retriever_agent: RetrieverAgent = RetrieverAgent(
+    model_handler=model,
+    **cfg["AGENTS"]["retriever"] if "AGENTS" in cfg and "retriever" in cfg["AGENTS"] else {}
 )
 retriever_agent.set_vector_store(vector_store)
 
-synthesizer_agent: SynthesizerAgent = (
-    SynthesizerAgent.from_config(cfg["AGENTS"]["synthesizer"])
-    if "AGENTS" in cfg and "synthesizer" in cfg["AGENTS"]
-    else SynthesizerAgent()
+synthesizer_agent: SynthesizerAgent = SynthesizerAgent(
+    model_handler=model,
+    **cfg["AGENTS"]["synthesizer"] if "AGENTS" in cfg and "synthesizer" in cfg["AGENTS"] else {}
 )
 
 
@@ -186,8 +184,8 @@ def process_message_with_streaming(user_message: str, progress_queue: queue.Queu
         app.logger.info("Bot response: %s", bot_response)
 
         # Update model's chat history
-        model._add_to_history({"role": "user", "content": user_message})
-        model._add_to_history({"role": "assistant", "content": bot_response})
+        model.add_to_history({"role": "user", "content": user_message})
+        model.add_to_history({"role": "assistant", "content": bot_response})
 
         return bot_response
 
