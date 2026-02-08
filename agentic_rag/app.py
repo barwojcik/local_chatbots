@@ -75,30 +75,6 @@ def index() -> str:
     return render_template("index.html")  # Render the index.html template
 
 
-def get_messages() -> tuple[Response, int]:
-    """Get the chat history."""
-    try:
-        return (
-            jsonify(
-                {
-                    "status": "success",
-                    "messages": model.get_history(),
-                }
-            ),
-            200,
-        )
-    except Exception as e:
-        app.logger.error("Error when getting chat history: %s", e)
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                }
-            ),
-            500,
-        )
-
-
 def process_message_with_streaming(user_message: str, progress_queue: queue.Queue) -> str:
     """Process message and emit progress updates to queue."""
     try:
