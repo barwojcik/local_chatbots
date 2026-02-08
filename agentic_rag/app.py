@@ -187,15 +187,6 @@ def process_message_with_streaming(user_message: str, progress_queue: queue.Queu
         return None
 
 
-    except KeyError:
-        app.logger.error('Missing "userMessage" key in request data.')
-        return jsonify({"error": 'Missing "userMessage" key in request data.'}), 400
-
-    except Exception as e:
-        app.logger.error("Error processing message: %s", e)
-        return jsonify({"error": "Failed to process message."}), 500
-
-
 @app.route("/messages/stream", methods=["POST"])
 def stream_message_processing():
     """Stream agent progress and response using SSE."""
