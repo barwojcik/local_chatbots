@@ -13,9 +13,11 @@ file_path = file_handler.save_file(file)
 file_handler.cleanup_file(file_path)
 """
 
-import os
 import logging
-from typing import Any, Iterable
+import os
+from collections.abc import Iterable
+from typing import Any
+
 from werkzeug.datastructures.file_storage import FileStorage
 from werkzeug.utils import secure_filename
 
@@ -34,7 +36,8 @@ class FileHandler:
         extensions (list[str]): List of allowed file extensions (default: ['pdf'])
 
     Methods:
-        from_config (cls, config): Creates a new instance of the FileHandler class from a configuration dictionary.
+        from_config (cls, config): Creates a new instance of the FileHandler class from a
+            configuration dictionary.
         save_file: Save an uploaded file securely.
         save_files: Save all uploaded files securely.
         cleanup_file: Remove a processed file from the upload directory.
@@ -46,7 +49,7 @@ class FileHandler:
     def __init__(
         self,
         upload_folder: str = "uploads",
-        extensions: list[str] = None,
+        extensions: list[str] | None = None,
     ) -> None:
         """
         Initialize FileHandler with a specified upload folder.
@@ -71,7 +74,8 @@ class FileHandler:
             file_config: Configuration dictionary containing file settings.
 
         Returns:
-            FileHandler: New instance of the FileHandler class initialized with the provided configuration.
+            FileHandler: New instance of the FileHandler class initialized with the provided
+                configuration.
         """
         return cls(**file_config)
 
@@ -92,7 +96,7 @@ class FileHandler:
         if not filename:
             raise ValueError("No file provided.")
 
-        if not "." in filename:
+        if "." not in filename:
             raise ValueError("Invalid file extension.")
 
         if not filename.lower().endswith(tuple(self._allowed_extensions)):
@@ -116,7 +120,7 @@ class FileHandler:
         filename = secure_filename(file.filename)
         file_path = os.path.join(self.upload_folder, filename)
         file.save(file_path)
-        logger.info(f"File saved successfully at: %s", file_path)
+        logger.info("File saved successfully at: %s", file_path)
         return file_path
 
     def save_files(self, file_list: Iterable[FileStorage]) -> list[str]:
@@ -147,9 +151,9 @@ class FileHandler:
         try:
             if os.path.exists(file_path):
                 os.remove(file_path)
-                logger.info(f"Cleaned up file: %s", file_path)
+                logger.info("Cleaned up file: %s", file_path)
         except Exception as e:
-            logger.error(f"Error cleaning up file %s: %s", file_path, e)
+            logger.error("Error cleaning up file %s: %s", file_path, e)
 
     def cleanup_files(self, file_paths: list[str]) -> None:
         """

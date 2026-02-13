@@ -1,9 +1,10 @@
 """
-This module provides a `RAGOllamaModelHandler` class for using Ollama pre-trained text generation models with
-Retrieval Augmented Generation (RAG).
+This module provides a `RAGOllamaModelHandler` class for using Ollama pre-trained text
+generation models with Retrieval Augmented Generation (RAG).
 
 The `RAGOllamaModelHandler` class simplifies the process of loading, initializing, and using
-a text generation model from the `ollama` library, incorporating external context for improved responses.
+a text generation model from the `ollama` library, incorporating external context for
+improved responses.
 It provides methods for preprocessing prompts, generating text, and maintaining a chat history.
 
 The module also includes basic logging functionality to provide information about
@@ -11,13 +12,17 @@ the model's initialization and usage.
 
 Example usage:
 model_handler = RAGOllamaModelHandler()
-output = model_handler.predict("What is the capital of France?", context=["The capital of France is Paris."])
+output = model_handler.predict(
+    "What is the capital of France?",
+    context=["The capital of France is Paris."],
+)
 """
 
 import logging
-from typing import Any, Optional
 from collections import deque
-from ollama import Client, ListResponse, ChatResponse
+from typing import Any
+
+from ollama import ChatResponse, Client, ListResponse
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +38,8 @@ class OllamaModelHandler:
         max_history_messages (int): The maximum number of messages to keep in the chat history.
 
     Methods:
-        from_config(cfg): Creates a new instance of the OllamaModelHandler class from a configuration dictionary.
+        from_config(cfg): Creates a new instance of the OllamaModelHandler class from a
+            configuration dictionary.
         get_available_model_names(): Returns a list of available Ollama models.
         get_current_model_name(): Returns the current Ollama model identifier.
         is_service_available(): Returns True if the Ollama service is available.
@@ -48,9 +54,9 @@ class OllamaModelHandler:
 
     def __init__(
         self,
-        model_name: Optional[str] = None,
-        ollama_host: Optional[str] = None,
-        chat_kwargs: Optional[dict[str, Any]] = None,
+        model_name: str | None = None,
+        ollama_host: str | None = None,
+        chat_kwargs: dict[str, Any] | None = None,
         max_history_messages: int = 10,
     ) -> None:
         """
@@ -62,7 +68,7 @@ class OllamaModelHandler:
             chat_kwargs (dict[str, Any]): Additional keyword arguments passed to the chat method.
             max_history_messages (int): The maximum number of messages to keep in the chat history.
         """
-        self._model_name: str = model_name
+        self._model_name: str = model_name or self.DEFAULT_MODEL
         self._is_model_initialized: bool = False
         self._client: Client = Client(host=ollama_host)
         self._chat_kwargs: dict = chat_kwargs or dict()
@@ -73,7 +79,8 @@ class OllamaModelHandler:
 
     @classmethod
     def from_config(cls, model_config: dict[str, Any]) -> "OllamaModelHandler":
-        """Creates a new instance of the RAGOllamaModelHandler class from a configuration dictionary.
+        """Creates a new instance of the RAGOllamaModelHandler class from a configuration
+        dictionary.
 
         Args:
             model_config: Configuration dictionary containing model settings.
@@ -112,7 +119,9 @@ class OllamaModelHandler:
             list[str]: List of available model names.
         """
         available_models: ListResponse = self._get_available_models()
-        available_model_names: list[str] = [model.model for model in available_models.models]
+        available_model_names: list[str] = [
+            model.model for model in available_models.models if model.model is not None
+        ]
         return available_model_names
 
     def get_current_model_name(self) -> str:
@@ -203,7 +212,10 @@ class OllamaModelHandler:
         """
         prompt: dict[str, str] = {
             "role": "user",
-            "content": f'Given context listed:{" ".join(context)} Answer based on the context. {prompt_text}',
+            "content": (
+                f"Given context listed:{' '.join(context)} "
+                f"Answer based on the context. {prompt_text}"
+            ),
         }
         return prompt
 
@@ -231,7 +243,8 @@ class OllamaModelHandler:
         Generates text based on provided messages without affecting chat history.
 
         Args:
-            messages (list[dict[str, str]]): List of message dictionaries with 'role' and 'content' keys.
+            messages (list[dict[str, str]]): List of message dictionaries with 'role' and
+                'content' keys.
 
         Returns:
             str: The generated text.
@@ -248,7 +261,7 @@ class OllamaModelHandler:
             )
 
             logger.debug("Ollama response: %s", ollama_response)
-            return ollama_response.message.content
+            return ollama_response.message.content  # type: ignore
         except Exception as e:
             logger.error("Error during text generation: %s", e)
             return "Sorry, I encountered an error while processing your request."

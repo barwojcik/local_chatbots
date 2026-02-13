@@ -2,10 +2,11 @@
 This module provides a `VectorStoreHandler` class for managing and querying a vector store.
 
 The `VectorStoreHandler` class facilitates the process of loading, chunking, embedding, and storing
-documents within a vector store, primarily for semantic search and retrieval of relevant information.
+documents within a vector store, primarily for semantic search and retrieval of relevant
+information.
 
-It leverages the LlamaIndex and Ollama ecosystems to provide a streamlined workflow for handling document
-processing and similarity search.
+It leverages the LlamaIndex and Ollama ecosystems to provide a streamlined workflow for
+handling document processing and similarity search.
 
 Example usage:
 from your_module import VectorStoreHandler
@@ -18,11 +19,12 @@ print(context) # Output: List of relevant text chunks
 """
 
 import logging
-from typing import Any, Optional
-from langchain_core.documents import Document
-from langchain_community.vectorstores import Chroma
-from langchain_ollama import OllamaEmbeddings
+from typing import Any
+
 from document_processor import DocumentProcessor
+from langchain_community.vectorstores import Chroma
+from langchain_core.documents import Document
+from langchain_ollama import OllamaEmbeddings
 
 logger = logging.getLogger(__name__)
 
@@ -35,15 +37,19 @@ class VectorStoreHandler:
     and Chroma as the vector database.
 
     Args:
-        embeddings_model (str, optional): The identifier of the Ollama embeddings model. Default "llama3.2:1b".
+        embeddings_model (str, optional): The identifier of the Ollama embeddings model.
+            Default "llama3.2:1b".
         ollama_host (str, optional): The hostname of the Ollama.
-        model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embedding model.
+        model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to
+            the embedding model.
         splitter_params (dict[str, Any], optional): Additional parameters for the text splitter.
-        query_params (dict[str, Any], optional): Additional parameters for the similarity search query.
+        query_params (dict[str, Any], optional): Additional parameters for the similarity
+            search query.
 
     Methods:
         clean_chunks(chunks): Removes newlines from text chunks.
-        process_documents(document_paths): Loads, chunks, embeds, and stores documents in the vector store.
+        process_documents(document_paths): Loads, chunks, embeds, and stores documents in
+            the vector store.
         get_context(query): Retrieves relevant context from the vector store based on a query.
         reset(): Resets the vector store by deleting the content of the collection.
     """
@@ -52,12 +58,12 @@ class VectorStoreHandler:
 
     def __init__(
         self,
-        embeddings_model: Optional[str] = None,
-        ollama_host: Optional[str] = None,
-        model_kwargs: dict[str, Any] = None,
-        splitter_params: dict[str, Any] = None,
-        query_params: dict[str, Any] = None,
-        document_processor_config: Optional[dict[str, Any]] = None,
+        embeddings_model: str | None = None,
+        ollama_host: str | None = None,
+        model_kwargs: dict[str, Any] | None = None,
+        splitter_params: dict[str, Any] | None = None,
+        query_params: dict[str, Any] | None = None,
+        document_processor_config: dict[str, Any] | None = None,
     ) -> None:
         """
         Initializes the VectorStoreHandler with the specified model and parameters.
@@ -65,10 +71,14 @@ class VectorStoreHandler:
         Args:
             embeddings_model (str, optional): The identifier of the Hugging Face embeddings model.
                 Defaults to "sentence-transformers/all-MiniLM-L6-v2".
-            model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embedding model.
-            splitter_params (dict[str, Any], optional): Additional parameters for the text splitter.
-            query_params (dict[str, Any], optional): Additional parameters for the similarity search query.
-            document_processor_config (dict[str, Any], optional): Configuration for document processor.
+            model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to
+                the embedding model.
+            splitter_params (dict[str, Any], optional): Additional parameters for the text
+                splitter.
+            query_params (dict[str, Any], optional): Additional parameters for the similarity
+                search query.
+            document_processor_config (dict[str, Any], optional): Configuration for
+                document processor.
         """
         logger.info("Initializing vector store...")
         model_kwargs = model_kwargs or dict()
@@ -100,12 +110,12 @@ class VectorStoreHandler:
         Creates a new instance of the VectorStoreHandler class from a configuration dictionary.
 
         Args:
-            vector_store_config (dict[str, str]): A dictionary containing the configuration parameters for
-                the vector store.
+            vector_store_config (dict[str, str]): A dictionary containing the configuration
+                parameters for the vector store.
 
         Returns:
-            VectorStoreHandler: A new instance of the VectorStoreHandler class initialized with the provided
-                configuration.
+            VectorStoreHandler: A new instance of the VectorStoreHandler class initialized
+                with the provided configuration.
         """
         config: dict[str, Any] = vector_store_config.copy()
         return cls(**config)
@@ -134,7 +144,8 @@ class VectorStoreHandler:
         Loads, chunks, embeds, and stores documents in the vector store.
 
         Args:
-            document_paths (list[str] | str): The path or list of paths to the documents to be processed.
+            document_paths (list[str] | str): The path or list of paths to the documents
+                to be processed.
         """
         if isinstance(document_paths, str):
             document_paths = [document_paths]
@@ -157,9 +168,7 @@ class VectorStoreHandler:
         logger.info("Query %s returned %s", query, context)
         return context
 
-    def get_context_with_metadata(
-        self, query: str, k: Optional[int] = None
-    ) -> list[dict[str, Any]]:
+    def get_context_with_metadata(self, query: str, k: int | None = None) -> list[dict[str, Any]]:
         """
         Retrieves relevant context with metadata from the vector store.
 
@@ -188,7 +197,7 @@ class VectorStoreHandler:
         logger.info("Query '%s' returned %d documents with metadata", query, len(results))
         return results
 
-    def hybrid_search(self, query: str, k: Optional[int] = None) -> list[dict[str, Any]]:
+    def hybrid_search(self, query: str, k: int | None = None) -> list[dict[str, Any]]:
         """
         Performs hybrid search combining semantic and keyword-based retrieval.
 

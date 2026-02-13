@@ -6,7 +6,11 @@ and returns the most relevant document chunks with metadata.
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
+
+from model import OllamaModelHandler
+from vector_store import VectorStoreHandler
+
 from .base_agent import BaseAgent
 
 logger = logging.getLogger(__name__)
@@ -22,7 +26,8 @@ class RetrieverAgent(BaseAgent):
     Args:
         model_name (str, optional): The identifier of the Ollama model to use (for re-ranking).
         ollama_host (str, optional): The host of the Ollama service.
-        strategies (list[str], optional): List of retrieval strategies to use. Default: ["semantic"].
+        strategies (list[str], optional): List of retrieval strategies to use.
+            Default: ["semantic"].
         enable_reranking (bool, optional): Whether to re-rank retrieved documents. Default: True.
         max_results (int, optional): Maximum number of results to return. Default: 5.
         chat_kwargs (dict[str, Any], optional): Additional keyword arguments for chat.
@@ -33,29 +38,31 @@ class RetrieverAgent(BaseAgent):
         set_vector_store: Sets the vector store handler for retrieval.
     """
 
-    DEFAULT_RERANK_PROMPT = """You are a document relevance scorer. Given a query and a document chunk, rate the relevance on a scale of 0-10.
+    DEFAULT_RERANK_PROMPT = """
+    You are a document relevance scorer. Given a query and a document chunk, rate the relevance
+    on a scale of 0-10.
 
     Query: {query}
-    
+
     Document chunk: {chunk}
-    
+
     Consider:
     - Direct answer to query
     - Contextual relevance
     - Information completeness
-    
+
     Respond with ONLY a single number between 0-10, no other text."""
 
     def __init__(
         self,
-        model_handler=None,
-        model_name: Optional[str] = None,
-        ollama_host: Optional[str] = None,
-        strategies: Optional[list[str]] = None,
+        model_handler: OllamaModelHandler | None = None,
+        model_name: str | None = None,
+        ollama_host: str | None = None,
+        strategies: list[str] | None = None,
         enable_reranking: bool = True,
         max_results: int = 5,
-        system_prompt: Optional[str] = None,
-        chat_kwargs: Optional[dict[str, Any]] = None,
+        system_prompt: str | None = None,
+        chat_kwargs: dict[str, Any] | None = None,
     ) -> None:
         """
         Initializes the RetrieverAgent with specified parameters.
@@ -80,9 +87,9 @@ class RetrieverAgent(BaseAgent):
         self._strategies = strategies or ["semantic"]
         self._enable_reranking = enable_reranking
         self._max_results = max_results
-        self._vector_store = None
+        self._vector_store: VectorStoreHandler | None = None
 
-    def set_vector_store(self, vector_store) -> None:
+    def set_vector_store(self, vector_store: VectorStoreHandler) -> None:
         """
         Sets the vector store handler for retrieval.
 
@@ -145,7 +152,7 @@ class RetrieverAgent(BaseAgent):
         return scored_docs
 
     def execute(
-        self, query: str, query_analysis: Optional[dict[str, Any]] = None
+        self, query: str, query_analysis: dict[str, Any] | None = None
     ) -> list[dict[str, Any]]:
         """
         Retrieves relevant documents for the query.

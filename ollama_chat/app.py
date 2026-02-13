@@ -10,7 +10,8 @@ for cross-origin requests. It also includes basic logging for monitoring and deb
 """
 
 import logging
-from flask import Flask, render_template, request, jsonify
+
+from flask import Flask, jsonify, render_template, request
 from flask.wrappers import Response
 from flask_cors import CORS
 from model import OllamaModelHandler
@@ -24,7 +25,9 @@ cfg = app.config
 logging.basicConfig(level=cfg["LOG_LEVEL"])
 
 # Initialize the model handler with the model configuration from the config file
-model: OllamaModelHandler = OllamaModelHandler.from_config(cfg["MODEL"]) if "MODEL" in cfg else OllamaModelHandler()
+model: OllamaModelHandler = (
+    OllamaModelHandler.from_config(cfg["MODEL"]) if "MODEL" in cfg else OllamaModelHandler()
+)
 
 
 # Define the route for the index page
@@ -70,7 +73,7 @@ def process_message() -> tuple[Response, int]:
     """Process user messages and return chatbot responses."""
     try:
         # Extract the user's message from the request
-        user_message: str = request.json["userMessage"]
+        user_message: str = request.json["userMessage"]  # type: ignore
         app.logger.info("User message: %s", user_message)
 
         # Process the user's message using the worker module
@@ -176,7 +179,7 @@ def process_set_model() -> tuple[Response, int]:
         tuple[Response, int]: A tuple containing a ``Response`` object and an integer status code.
     """
     try:
-        model_name = request.json["model"]
+        model_name = request.json["model"]  # type: ignore
         app.logger.info("Setting model to %s", model_name)
         if model.set_model(model_name):
             return jsonify({"success": True}), 200

@@ -9,17 +9,18 @@ The application is designed to be accessible through a web interface and utilize
 for cross-origin requests. It also includes basic logging for monitoring and debugging.
 """
 
-import logging
 import json
+import logging
 import queue
 import threading
-from flask import Flask, render_template, request, jsonify, stream_with_context
+
+from agents import QueryAnalyzerAgent, RetrieverAgent, RouterAgent, SynthesizerAgent
+from file_handler import FileHandler
+from flask import Flask, jsonify, render_template, request, stream_with_context
 from flask.wrappers import Response
 from flask_cors import CORS
 from model import OllamaModelHandler
-from file_handler import FileHandler
 from vector_store import VectorStoreHandler
-from agents import RouterAgent, QueryAnalyzerAgent, RetrieverAgent, SynthesizerAgent
 
 # Initialize Flask app and CORS
 app = Flask(__name__)
@@ -48,23 +49,25 @@ file_handler: FileHandler = (
 # Initialize agents with shared model handler
 router_agent: RouterAgent = RouterAgent(
     model_handler=model,
-    **cfg["AGENTS"]["router"] if "AGENTS" in cfg and "router" in cfg["AGENTS"] else {}
+    **cfg["AGENTS"]["router"] if "AGENTS" in cfg and "router" in cfg["AGENTS"] else {},
 )
 
 query_analyzer_agent: QueryAnalyzerAgent = QueryAnalyzerAgent(
     model_handler=model,
-    **cfg["AGENTS"]["query_analyzer"] if "AGENTS" in cfg and "query_analyzer" in cfg["AGENTS"] else {}
+    **cfg["AGENTS"]["query_analyzer"]
+    if "AGENTS" in cfg and "query_analyzer" in cfg["AGENTS"]
+    else {},
 )
 
 retriever_agent: RetrieverAgent = RetrieverAgent(
     model_handler=model,
-    **cfg["AGENTS"]["retriever"] if "AGENTS" in cfg and "retriever" in cfg["AGENTS"] else {}
+    **cfg["AGENTS"]["retriever"] if "AGENTS" in cfg and "retriever" in cfg["AGENTS"] else {},
 )
 retriever_agent.set_vector_store(vector_store)
 
 synthesizer_agent: SynthesizerAgent = SynthesizerAgent(
     model_handler=model,
-    **cfg["AGENTS"]["synthesizer"] if "AGENTS" in cfg and "synthesizer" in cfg["AGENTS"] else {}
+    **cfg["AGENTS"]["synthesizer"] if "AGENTS" in cfg and "synthesizer" in cfg["AGENTS"] else {},
 )
 
 
@@ -160,18 +163,18 @@ def process_message_with_streaming(user_message: str, progress_queue: queue.Queu
     except Exception as e:
         app.logger.error("Error processing message: %s", e)
         progress_queue.put({"type": "error", "message": str(e)})
-        return None
+        return "Error processing message. Please try again later."
 
 
 @app.route("/messages/stream", methods=["POST"])
 def stream_message_processing():
     """Stream agent progress and response using SSE."""
     try:
-        user_message: str = request.json["userMessage"]
+        user_message: str = request.json["userMessage"]  # type: ignore
         app.logger.info("Streaming message processing: %s", user_message)
 
         def generate():
-            progress_queue = queue.Queue()
+            progress_queue: queue.Queue = queue.Queue()
 
             # Start processing in background thread
             def process():
@@ -212,8 +215,10 @@ def process_document() -> tuple[Response, int]:
             return (
                 jsonify(
                     {
-                        "botResponse": "It seems like the file was not uploaded correctly, can you try "
-                        "again. If the problem persists, try using a different file"
+                        "botResponse": (
+                            "It seems like the file was not uploaded correctly, can you try "
+                            "again. If the problem persists, try using a different file"
+                        ),
                     }
                 ),
                 400,
@@ -230,8 +235,10 @@ def process_document() -> tuple[Response, int]:
         return (
             jsonify(
                 {
-                    "botResponse": "Thank you for providing your PDF document. I have analyzed it, so now you can ask me any "
-                    "questions regarding it!"
+                    "botResponse": (
+                        "Thank you for providing your PDF document. I have analyzed it, so now "
+                        "you can ask me any questions regarding it!"
+                    )
                 }
             ),
             200,
@@ -359,7 +366,7 @@ def process_set_model() -> tuple[Response, int]:
         tuple[Response, int]: A tuple containing a ``Response`` object and an integer status code.
     """
     try:
-        model_name = request.json["model"]
+        model_name = request.json["model"]  # type: ignore
         app.logger.info("Setting model to %s", model_name)
         if model.set_model(model_name):
             return jsonify({"success": True}), 200

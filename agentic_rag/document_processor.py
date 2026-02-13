@@ -10,7 +10,8 @@ This module provides advanced document processing capabilities including:
 
 import logging
 import re
-from typing import Any, Optional
+from typing import Any
+
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document
@@ -83,7 +84,7 @@ class DocumentProcessor:
         """
         return cls(**config)
 
-    def _extract_heading_level(self, text: str) -> Optional[int]:
+    def _extract_heading_level(self, text: str) -> int | None:
         """
         Extracts heading level from text if it appears to be a heading.
 
@@ -182,12 +183,12 @@ class DocumentProcessor:
         Returns:
             list[Document]: List of semantically chunked documents.
         """
-        chunks = []
+        chunks: list[Document] = []
 
         for doc in documents:
             # Split by paragraphs first
             paragraphs = doc.page_content.split("\n\n")
-            current_chunk = []
+            current_chunk: list[str] = []
             current_size = 0
 
             for para in paragraphs:
@@ -241,12 +242,12 @@ class DocumentProcessor:
         Returns:
             list[Document]: List of hierarchically chunked documents.
         """
-        chunks = []
+        chunks: list[Document] = []
         current_section = None
 
         for doc in documents:
             lines = doc.page_content.split("\n")
-            current_chunk = []
+            current_chunk: list[str] = []
             current_size = 0
 
             for line in lines:

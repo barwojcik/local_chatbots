@@ -10,14 +10,14 @@ for cross-origin requests. It also includes basic logging for monitoring and deb
 """
 
 import logging
-from flask import Flask, render_template, request, jsonify
+
+from file_handler import FileHandler
+from flask import Flask, jsonify, render_template, request
 from flask.wrappers import Response
 from flask_cors import CORS
-from werkzeug.datastructures.file_storage import FileStorage
-
 from model import RAGModelHandler
 from vector_store import VectorStoreHandler
-from file_handler import FileHandler
+from werkzeug.datastructures.file_storage import FileStorage
 
 # Initialize Flask app and CORS
 app = Flask(__name__)
@@ -45,7 +45,7 @@ def process_message_route() -> tuple[Response, int]:
     """Process user messages and return chatbot responses."""
     try:
         # Extract the user's message from the request
-        user_message: str = request.json["userMessage"]
+        user_message: str = request.json["userMessage"]  # type: ignore
         app.logger.info("User message: %s", user_message)
 
         # Get context to a user message from the vector store
@@ -84,8 +84,10 @@ def process_document_route() -> tuple[Response, int]:
             return (
                 jsonify(
                     {
-                        "botResponse": "It seems like the file was not uploaded correctly, can you try "
-                        "again. If the problem persists, try using a different file"
+                        "botResponse": (
+                            "It seems like the file was not uploaded correctly, can you try again. "
+                            "If the problem persists, try using a different file"
+                        )
                     }
                 ),
                 400,
@@ -100,18 +102,24 @@ def process_document_route() -> tuple[Response, int]:
         return (
             jsonify(
                 {
-                    "botResponse": "Thank you for providing your PDF document. I have analyzed it, so now you can ask me any "
-                    "questions regarding it!"
+                    "botResponse": (
+                        "Thank you for providing your PDF document. I have analyzed it, so now "
+                        "you can ask me any questions regarding it!"
+                    )
                 }
             ),
             200,
         )
     except ValueError as e:
         app.logger.error("Error processing document: %s", e)
-        return jsonify({"botResponse": f"An error occurred while processing your document: {e}"}), 400
+        return jsonify(
+            {"botResponse": f"An error occurred while processing your document: {e}"}
+        ), 400
     except Exception as e:
         app.logger.error("Error processing document: %s", e)
-        return jsonify({"botResponse": f"An error occurred while processing your document: {e}"}), 500
+        return jsonify(
+            {"botResponse": f"An error occurred while processing your document: {e}"}
+        ), 500
 
 
 # Define the route for resetting model chat history

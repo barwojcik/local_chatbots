@@ -7,7 +7,8 @@ and functionality for all specialized agents.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
+
 from model import OllamaModelHandler
 
 logger = logging.getLogger(__name__)
@@ -19,10 +20,12 @@ class BaseAgent(ABC):
 
     Args:
         model_handler (OllamaModelHandler, optional): Instance of OllamaModelHandler to use.
-        model_name (str, optional): The identifier of the Ollama model to use (if model_handler not provided).
+        model_name (str, optional): The identifier of the Ollama model to use (if model_handler
+            not provided).
         ollama_host (str, optional): The host of the Ollama service (if model_handler not provided).
         system_prompt (str, optional): System prompt to guide agent behavior.
-        chat_kwargs (dict[str, Any], optional): Additional keyword arguments for chat (if model_handler not provided).
+        chat_kwargs (dict[str, Any], optional): Additional keyword arguments for chat (if
+            model_handler not provided).
 
     Methods:
         from_config: Creates a new instance from a configuration dictionary.
@@ -33,11 +36,11 @@ class BaseAgent(ABC):
 
     def __init__(
         self,
-        model_handler: Optional[OllamaModelHandler] = None,
-        model_name: Optional[str] = None,
-        ollama_host: Optional[str] = None,
-        system_prompt: Optional[str] = None,
-        chat_kwargs: Optional[dict[str, Any]] = None,
+        model_handler: OllamaModelHandler | None = None,
+        model_name: str | None = None,
+        ollama_host: str | None = None,
+        system_prompt: str | None = None,
+        chat_kwargs: dict[str, Any] | None = None,
     ) -> None:
         """
         Initializes the BaseAgent with the specified model and parameters.
@@ -57,7 +60,7 @@ class BaseAgent(ABC):
                 ollama_host=ollama_host,
                 chat_kwargs=chat_kwargs,
             )
-        self._system_prompt: Optional[str] = system_prompt
+        self._system_prompt: str | None = system_prompt
 
     @classmethod
     def from_config(cls, agent_config: dict[str, Any]) -> "BaseAgent":
@@ -92,7 +95,7 @@ class BaseAgent(ABC):
             raise
 
     def _build_messages(
-        self, user_content: str, context: Optional[dict[str, Any]] = None
+        self, user_content: str, context: dict[str, Any] | None = None
     ) -> list[dict[str, str]]:
         """
         Builds the messages list for the model call.
@@ -114,7 +117,7 @@ class BaseAgent(ABC):
         return messages
 
     @abstractmethod
-    def execute(self, *args, **kwargs) -> Any:
+    def execute(self, *args: Any, **kwargs: Any) -> Any:
         """
         Abstract method that each agent must implement.
 

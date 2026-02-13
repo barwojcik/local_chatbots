@@ -10,7 +10,8 @@ for cross-origin requests. It also includes basic logging for monitoring and deb
 """
 
 import logging
-from flask import Flask, render_template, request, jsonify
+
+from flask import Flask, jsonify, render_template, request
 from flask.wrappers import Response
 from flask_cors import CORS
 from model import ModelHandler
@@ -40,7 +41,7 @@ def process_message_route() -> tuple[Response, int]:
     """Process user messages and return chatbot responses."""
     try:
         # Extract the user's message from the request
-        user_message: str = request.json["userMessage"]
+        user_message: str = request.json["userMessage"]  # type: ignore
         app.logger.info("User message: %s", user_message)
 
         # Process the user's message using the worker module

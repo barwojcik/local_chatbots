@@ -9,9 +9,9 @@ This package provides specialized agents for:
 """
 
 from .base_agent import BaseAgent
-from .router_agent import RouterAgent
 from .query_agent import QueryAnalyzerAgent
 from .retriever_agent import RetrieverAgent
+from .router_agent import RouterAgent
 from .synthesizer_agent import SynthesizerAgent
 
 __all__ = [

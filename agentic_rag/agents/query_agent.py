@@ -5,9 +5,12 @@ This agent improves query quality by expanding terms, identifying key concepts,
 and generating multiple query variations for comprehensive document retrieval.
 """
 
-import logging
 import json
-from typing import Any, Optional
+import logging
+from typing import Any
+
+from model import OllamaModelHandler
+
 from .base_agent import BaseAgent
 
 logger = logging.getLogger(__name__)
@@ -32,32 +35,33 @@ class QueryAnalyzerAgent(BaseAgent):
         execute: Analyzes query and returns enhanced query information.
     """
 
-    DEFAULT_SYSTEM_PROMPT = """You are a query analysis agent that enhances queries for document retrieval.
+    DEFAULT_SYSTEM_PROMPT = """
+    You are a query analysis agent that enhances queries for document retrieval.
 
     Analyze the query and respond with a JSON object containing:
     - "enhanced_query": improved version of the original query
     - "key_concepts": list of important keywords/concepts
     - "query_variations": list of alternative phrasings (if requested)
     - "query_type": type of query (factual, analytical, procedural, conceptual)
-    
+
     Guidelines for enhancement:
     1. Expand abbreviations and acronyms
     2. Add relevant synonyms
     3. Clarify ambiguous terms
     4. Maintain the original intent
     5. Keep queries concise but complete
-    
+
     Respond ONLY with valid JSON, no additional text."""
 
     def __init__(
         self,
-        model_handler=None,
-        model_name: Optional[str] = None,
-        ollama_host: Optional[str] = None,
+        model_handler: OllamaModelHandler | None = None,
+        model_name: str | None = None,
+        ollama_host: str | None = None,
         generate_variations: bool = True,
         max_variations: int = 3,
-        system_prompt: Optional[str] = None,
-        chat_kwargs: Optional[dict[str, Any]] = None,
+        system_prompt: str | None = None,
+        chat_kwargs: dict[str, Any] | None = None,
     ) -> None:
         """
         Initializes the QueryAnalyzerAgent with specified parameters.

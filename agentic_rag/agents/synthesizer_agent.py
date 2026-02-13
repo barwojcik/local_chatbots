@@ -6,7 +6,10 @@ accurate, well-sourced responses with optional citations.
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
+
+from model import OllamaModelHandler
+
 from .base_agent import BaseAgent
 
 logger = logging.getLogger(__name__)
@@ -33,7 +36,8 @@ class SynthesizerAgent(BaseAgent):
         set_chat_history: Sets the chat history for context-aware responses.
     """
 
-    DEFAULT_SYSTEM_PROMPT = """You are a helpful assistant that answers questions based on provided context.
+    DEFAULT_SYSTEM_PROMPT = """
+    You are a helpful assistant that answers questions based on provided context.
 
     Guidelines:
     1. Answer based primarily on the provided context
@@ -42,10 +46,12 @@ class SynthesizerAgent(BaseAgent):
     4. Include relevant details from the context
     5. Maintain a helpful and professional tone
     6. If asked to cite sources, reference the document chunks provided
-    
-    If the context is insufficient, you may use your general knowledge but clearly indicate when you're doing so."""
 
-    CITATION_SYSTEM_PROMPT = """You are a helpful assistant that answers questions based on provided context.
+    If the context is insufficient, you may use your general knowledge but clearly indicate when
+    you're doing so."""
+
+    CITATION_SYSTEM_PROMPT = """
+    You are a helpful assistant that answers questions based on provided context.
 
     Guidelines:
     1. Answer based primarily on the provided context
@@ -54,7 +60,7 @@ class SynthesizerAgent(BaseAgent):
     4. Be accurate and precise
     5. Include relevant details from the context
     6. Maintain a helpful and professional tone
-    
+
     At the end of your response, list the sources used:
     ---
     Sources:
@@ -64,13 +70,13 @@ class SynthesizerAgent(BaseAgent):
 
     def __init__(
         self,
-        model_handler=None,
-        model_name: Optional[str] = None,
-        ollama_host: Optional[str] = None,
+        model_handler: OllamaModelHandler | None = None,
+        model_name: str | None = None,
+        ollama_host: str | None = None,
         include_citations: bool = True,
         max_context_chunks: int = 5,
-        system_prompt: Optional[str] = None,
-        chat_kwargs: Optional[dict[str, Any]] = None,
+        system_prompt: str | None = None,
+        chat_kwargs: dict[str, Any] | None = None,
     ) -> None:
         """
         Initializes the SynthesizerAgent with specified parameters.
@@ -99,7 +105,7 @@ class SynthesizerAgent(BaseAgent):
         )
         self._include_citations = include_citations
         self._max_context_chunks = max_context_chunks
-        self._chat_history = []
+        self._chat_history: list = []
 
     def set_chat_history(self, chat_history: list[dict[str, str]]) -> None:
         """
@@ -147,7 +153,7 @@ class SynthesizerAgent(BaseAgent):
         self,
         query: str,
         retrieved_documents: list[dict[str, Any]],
-        chat_history: Optional[list[dict[str, str]]] = None,
+        chat_history: list[dict[str, str]] | None = None,
     ) -> str:
         """
         Generates a response based on the query and retrieved documents.
@@ -172,11 +178,11 @@ class SynthesizerAgent(BaseAgent):
             # Build prompt with context
             user_prompt = f"""Context from documents:
             {context}
-            
+
             ---
-            
+
             User question: {query}
-            
+
             Please answer the question based on the context provided above."""
 
             # Build messages with chat history
@@ -208,7 +214,7 @@ class SynthesizerAgent(BaseAgent):
     def execute_without_context(
         self,
         query: str,
-        chat_history: Optional[list[dict[str, str]]] = None,
+        chat_history: list[dict[str, str]] | None = None,
     ) -> str:
         """
         Generates a response without retrieved context (for queries that don't need RAG).
@@ -233,7 +239,9 @@ class SynthesizerAgent(BaseAgent):
             messages.append(
                 {
                     "role": "system",
-                    "content": "You are a helpful assistant. Answer questions clearly and concisely.",
+                    "content": (
+                        "You are a helpful assistant. Answer questions clearly and concisely."
+                    ),
                 }
             )
 

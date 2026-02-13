@@ -13,7 +13,8 @@ MODEL_NAME = "llama3.2:3b"
 OLLAMA_HOST = "http://localhost:11434"
 
 # Multi-agent system configuration
-# Note: All agents share the same OllamaModelHandler instance configured by MODEL_NAME and OLLAMA_HOST
+# Note: All agents share the same OllamaModelHandler instance
+# configured by MODEL_NAME and OLLAMA_HOST
 AGENTS = dict(
     # Router agent determines if RAG retrieval is needed
     router=dict(

@@ -14,8 +14,9 @@ output = model_handler.predict("What is the capital of France?")
 """
 
 import logging
-import torch
 from typing import Any
+
+import torch
 from transformers import pipeline
 
 logger = logging.getLogger(__name__)
@@ -36,12 +37,15 @@ class ModelHandler:
 
     Args:
         model_id (str): The identifier of the pre-trained model to use.
-        device (str): The device to use for text generation. Defaults to None, which uses CUDA if available.
+        device (str): The device to use for text generation. Defaults to None, which uses CUDA
+            if available.
         max_history_messages (int): The maximum number of messages to keep in the chat history.
-        model_params (dict[str, Any]): Additional parameters to pass to the model initialization function.
+        model_params (dict[str, Any]): Additional parameters to pass to the model initialization
+            function.
 
     Methods:
-        from_config (cls, config): Creates a new instance of the ModelHandler class from a configuration dictionary.
+        from_config (cls, config): Creates a new instance of the ModelHandler class from a
+            configuration dictionary.
         clear_history (self): Clears the chat history.
         _preprocess_prompt (prompt_text): Preprocesses the prompt and returns it as a dictionary.
         _add_to_history (self, prompt): Adds a prompt to the chat history.
@@ -53,18 +57,21 @@ class ModelHandler:
     def __init__(
         self,
         model_id: str,
-        device: str = None,
+        device: str | None = None,
         max_history_messages: int = 10,
-        model_params: dict[str, Any] = None,
+        model_params: dict[str, Any] | None = None,
     ) -> None:
         """
         Initializes the ModelHandler with the specified model and parameters.
 
         Args:
             model_id (str): The identifier of the pre-trained model to use.
-            device (str): The device to use for text generation. Defaults to None, which uses CUDA if available.
-            max_history_messages (int): The maximum number of messages to keep in the chat history.
-            model_params (dict[str, Any]): Additional parameters to pass to the model initialization function.
+            device (str): The device to use for text generation. Defaults to None, which uses
+                CUDA if available.
+            max_history_messages (int): The maximum number of messages to keep in the chat
+                history.
+            model_params (dict[str, Any]): Additional parameters to pass to the model
+                initialization function.
         """
         logger.info("Initializing model %s.", model_id)
         if device is None:
@@ -139,7 +146,9 @@ class ModelHandler:
                 message: dict = self.chat_history.pop(0)
                 logger.info("Message %s deleted form the chat history.", message)
             logger.info("Chat history truncated to %s messages.", self.max_history_messages)
-        logger.info("Chat history at %s / %s messages.", len(self.chat_history), self.max_history_messages)
+        logger.info(
+            "Chat history at %s / %s messages.", len(self.chat_history), self.max_history_messages
+        )
 
     def predict(self, prompt_text: str) -> str:
         """

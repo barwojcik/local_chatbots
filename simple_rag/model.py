@@ -3,7 +3,8 @@ This module provides a `RAGModelHandler` class for using pre-trained text genera
 Retrieval Augmented Generation (RAG).
 
 The `RAGModelHandler` class simplifies the process of loading, initializing, and using
-a text generation model from the `transformers` library, incorporating external context for improved responses.
+a text generation model from the `transformers` library, incorporating external context for
+improved responses.
 It provides methods for preprocessing prompts, generating text, and maintaining a chat history.
 
 The module also includes basic logging functionality to provide information about
@@ -11,12 +12,16 @@ the model's initialization and usage.
 
 Example usage:
 model_handler = RAGModelHandler("meta-llama/Llama-3.2-1B-Instruct")
-output = model_handler.predict("What is the capital of France?", context=["The capital of France is Paris."])
+output = model_handler.predict(
+    "What is the capital of France?",
+    context=["The capital of France is Paris."],
+)
 """
 
 import logging
-import torch
 from typing import Any
+
+import torch
 from transformers import pipeline
 
 logger = logging.getLogger(__name__)
@@ -37,34 +42,41 @@ class RAGModelHandler:
 
     Args:
         model_id (str): The identifier of the pre-trained model to use.
-        device (str): The device to use for text generation. Defaults to None, which uses CUDA if available.
+        device (str): The device to use for text generation. Defaults to None, which uses CUDA
+            if available.
         max_history_messages (int): The maximum number of messages to keep in the chat history.
-        model_params (dict[str, Any]): Additional parameters to pass to the model initialization function.
+        model_params (dict[str, Any]): Additional parameters to pass to the model initialization
+            function.
 
     Methods:
-        from_config (cls, config): Creates a new instance of the RAGModelHandler class from a configuration dictionary.
+        from_config (cls, config): Creates a new instance of the RAGModelHandler class from a
+            configuration dictionary.
         clear_history (self): Clears the chat history.
-        _preprocess_prompt (prompt_text, context): Preprocesses the prompt and adds it to the chat history.
+        _preprocess_prompt (prompt_text, context): Preprocesses the prompt and adds it to the
+            chat history.
         _add_to_history (self, prompt): Adds a prompt to the chat history.
         _menage_history_length (self): Manages the length of the chat history.
-        predict (self, prompt_text, context): Generates text based on the prompt, context, and chat history.
+        predict (self, prompt_text, context): Generates text based on the prompt, context,
+            and chat history.
     """
 
     def __init__(
         self,
         model_id: str,
-        device: str = None,
+        device: str | None = None,
         max_history_messages: int = 10,
-        model_params: dict[str, Any] = None,
+        model_params: dict[str, Any] | None = None,
     ) -> None:
         """
         Initializes the RAGModelHandler with the specified model and parameters.
 
         Args:
             model_id (str): The identifier of the pre-trained model to use.
-            device (str): The device to use for text generation. Defaults to None, which uses CUDA if available.
+            device (str): The device to use for text generation. Defaults to None, which uses
+                CUDA if available.
             max_history_messages (int): The maximum number of messages to keep in the chat history.
-            model_params (dict[str, Any]): Additional parameters to pass to the model initialization function.
+            model_params (dict[str, Any]): Additional parameters to pass to the model
+                initialization function.
         """
         logger.info("Initializing model %s.", model_id)
         if device is None:
@@ -123,7 +135,8 @@ class RAGModelHandler:
         """
         prompt: dict[str, str] = {
             "role": "user",
-            "content": f'Given context listed:{" ".join(context)} Answer based on the context. ' f"{prompt_text}",
+            "content": f"Given context listed:{' '.join(context)} Answer based on the context. "
+            f"{prompt_text}",
         }
         return prompt
 
@@ -139,7 +152,9 @@ class RAGModelHandler:
                 message: dict = self.chat_history.pop(0)
                 logger.info("Message %s deleted form the chat history.", message)
             logger.info("Chat history truncated to %s messages.", self.max_history_messages)
-        logger.info("Chat history at %s / %s messages.", len(self.chat_history), self.max_history_messages)
+        logger.info(
+            "Chat history at %s / %s messages.", len(self.chat_history), self.max_history_messages
+        )
 
     def predict(self, prompt_text: str, context: list[str]) -> str:
         """

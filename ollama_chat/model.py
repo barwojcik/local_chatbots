@@ -1,5 +1,6 @@
 """
-This module provides a `OllamaModelHandler` class for using Ollama pre-trained text generation models.
+This module provides a `OllamaModelHandler` class for using Ollama pre-trained text generation
+models.
 
 The `OllamaModelHandler` class simplifies the process of loading, initializing, and using
 a text generation model from the `ollama` library. It provides methods
@@ -14,10 +15,10 @@ output = model_handler.predict("What is the capital of France?")
 """
 
 import logging
-from pyexpat.errors import messages
-from typing import Any, Optional
 from collections import deque
-from ollama import Client, ListResponse, ChatResponse
+from typing import Any
+
+from ollama import ChatResponse, Client, ListResponse
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,8 @@ class OllamaModelHandler:
         max_history_messages (int): The maximum number of messages to keep in the chat history.
 
     Methods:
-        from_config(cfg): Creates a new instance of the OllamaModelHandler class from a configuration dictionary.
+        from_config(cfg): Creates a new instance of the OllamaModelHandler class from a
+            configuration dictionary.
         get_available_model_names(): Returns a list of available Ollama models.
         get_current_model_name(): Returns the current Ollama model identifier.
         is_service_available(): Returns True if the Ollama service is available.
@@ -48,9 +50,9 @@ class OllamaModelHandler:
 
     def __init__(
         self,
-        model_name: Optional[str] = None,
-        ollama_host: Optional[str] = None,
-        chat_kwargs: Optional[dict[str, Any]] = None,
+        model_name: str | None = None,
+        ollama_host: str | None = None,
+        chat_kwargs: dict[str, Any] | None = None,
         max_history_messages: int = 10,
     ) -> None:
         """
@@ -62,7 +64,7 @@ class OllamaModelHandler:
             chat_kwargs (dict[str, Any]): Additional keyword arguments passed to the chat method.
             max_history_messages (int): The maximum number of messages to keep in the chat history.
         """
-        self._model_name: str = model_name
+        self._model_name: str = model_name if model_name else self.DEFAULT_MODEL
         self._is_model_initialized: bool = False
         self._client: Client = Client(host=ollama_host)
         self._chat_kwargs: dict = chat_kwargs or dict()
@@ -113,7 +115,9 @@ class OllamaModelHandler:
             list[str]: List of available model names.
         """
         available_models: ListResponse = self._get_available_models()
-        available_model_names: list[str] = [model.model for model in available_models.models]
+        available_model_names: list[str] = [
+            model.model for model in available_models.models if model.model is not None
+        ]
         return available_model_names
 
     def get_current_model_name(self) -> str:
@@ -203,7 +207,9 @@ class OllamaModelHandler:
     def get_history(self) -> list[dict[str, str]]:
         allowed_keys: list[str] = ["role", "content"]
         message_history: list[dict[str, str]] = list(self._chat_history)
-        message_history = [{k: v for k, v in msg.items() if k in allowed_keys} for msg in message_history]
+        message_history = [
+            {k: v for k, v in msg.items() if k in allowed_keys} for msg in message_history
+        ]
         return message_history
 
     def predict(self, prompt_text: str) -> str:
@@ -229,9 +235,9 @@ class OllamaModelHandler:
                 **self._chat_kwargs,
             )
 
-            logger.debug("Ollama response: %s", ollama_response)
+            logger.debug("Ollama response: %s", ollama_response)  # type: ignore
             self._add_to_history(dict(ollama_response.message))
-            return ollama_response.message.content
+            return ollama_response.message.content  # type: ignore
         except Exception as e:
             logger.error("Error during text generation: %s", e)
             return "Sorry, I encountered an error while processing your request."

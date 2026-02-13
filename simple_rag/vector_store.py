@@ -2,7 +2,8 @@
 This module provides a `VectorStoreHandler` class for managing and querying a vector store.
 
 The `VectorStoreHandler` class facilitates the process of loading, chunking, embedding, and storing
-documents within a vector store, primarily for semantic search and retrieval of relevant information.
+documents within a vector store, primarily for semantic search and retrieval of relevant
+information.
 
 It leverages the LangChain and Hugging Face ecosystems to provide a streamlined workflow for
 handling document processing and similarity search.
@@ -18,12 +19,13 @@ print(context) # Output: List of relevant text chunks
 """
 
 import logging
-import torch
 from typing import Any
+
+import torch
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_core.documents import Document
 from langchain_community.vectorstores import Chroma
+from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
 
 logger = logging.getLogger(__name__)
@@ -42,24 +44,27 @@ class VectorStoreHandler:
     Args:
         embeddings_model (str, optional): The identifier of the Hugging Face embeddings model.
             Defaults to "sentence-transformers/all-MiniLM-L6-v2".
-        model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embedding model.
-                If not provided, defaults to {"device": "cuda:0"} if CUDA is available, otherwise to {"device": "cpu"}.
+        model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the
+            embedding model. If not provided, defaults to {"device": "cuda:0"} if CUDA is
+            available, otherwise to {"device": "cpu"}.
         splitter_params (dict[str, Any], optional): Additional parameters for the text splitter.
-        query_params (dict[str, Any], optional): Additional parameters for the similarity search query.
+        query_params (dict[str, Any], optional): Additional parameters for the similarity search
+            query.
 
     Methods:
         clean_chunks(chunks): Removes newlines from text chunks.
-        process_document(document_path): Loads, chunks, embeds, and stores a document in the vector store.
+        process_document(document_path): Loads, chunks, embeds, and stores a document in the
+            vector store.
         get_context(query): Retrieves relevant context from the vector store based on a query.
         reset(): Resets the vector store by deleting the content of the collection.
     """
 
     def __init__(
         self,
-        embeddings_model="sentence-transformers/all-MiniLM-L6-v2",
-        model_kwargs: dict[str, Any] = None,
-        splitter_params: dict[str, Any] = None,
-        query_params: dict[str, Any] = None,
+        embeddings_model: str = "sentence-transformers/all-MiniLM-L6-v2",
+        model_kwargs: dict[str, Any] | None = None,
+        splitter_params: dict[str, Any] | None = None,
+        query_params: dict[str, Any] | None = None,
     ) -> None:
         """
         Initializes the VectorStoreHandler with the specified model and parameters.
@@ -67,10 +72,12 @@ class VectorStoreHandler:
         Args:
             embeddings_model (str, optional): The identifier of the Hugging Face embeddings model.
                 Defaults to "sentence-transformers/all-MiniLM-L6-v2".
-            model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the embedding model.
-                If not provided, defaults to {"device": "cuda:0"} if CUDA is available, otherwise to {"device": "cpu"}.
+            model_kwargs (dict[str, Any], optional): Additional keyword arguments to pass to the
+                embedding model. If not provided, defaults to {"device": "cuda:0"} if CUDA is
+                available, otherwise to {"device": "cpu"}.
             splitter_params (dict[str, Any], optional): Additional parameters for the text splitter.
-            query_params (dict[str, Any], optional): Additional parameters for the similarity search query.
+            query_params (dict[str, Any], optional): Additional parameters for the similarity search
+                query.
         """
         logger.info("Initializing vector store...")
         model_kwargs = model_kwargs or dict()
@@ -93,10 +100,12 @@ class VectorStoreHandler:
         Creates a new instance of the VectorStoreHandler class from a configuration dictionary.
 
         Args:
-            vector_store_config (dict[str, str]): A dictionary containing the configuration parameters for the vector store.
+            vector_store_config (dict[str, str]): A dictionary containing the configuration
+                parameters for the vector store.
 
         Returns:
-            VectorStoreHandler: A new instance of the VectorStoreHandler class initialized with the provided configuration.
+            VectorStoreHandler: A new instance of the VectorStoreHandler class initialized
+                with the provided configuration.
         """
         config: dict[str, Any] = vector_store_config.copy()
         return cls(**config)
@@ -119,7 +128,9 @@ class VectorStoreHandler:
         loader: PyPDFLoader = PyPDFLoader(document_path)
         logger.info("Document will be slit with parameters: %s", self._splitter_params)
 
-        text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(**self._splitter_params)
+        text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(
+            **self._splitter_params
+        )
         chunks: list[Document] = loader.load_and_split(text_splitter)
         self._clean_chunks(chunks)
 

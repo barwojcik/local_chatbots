@@ -1,6 +1,5 @@
 // Constants and state management
 const STATE = {
-    lightMode: true,
     isFirstMessage: true,
     responses: [],
     baseUrl: window.location.origin,
@@ -122,7 +121,7 @@ const showErrorMessage = (message) => {
 
     $('#message-list').append(`
         <div class="message-line error">
-            <div class="message-box error${!STATE.lightMode ? ' dark' : ''}">
+            <div class="message-box error">
                 ${message}
             </div>
         </div>
@@ -133,8 +132,8 @@ const showErrorMessage = (message) => {
 const populateUserMessage = (userMessage) => {
     $('#message-input').val('');
     $('#message-list').append(`
-        <div class="message-line my-text">
-            <div class="message-box my-text${!STATE.lightMode ? ' dark' : ''}">
+        <div class="message-line">
+            <div class="message-box my-text">
                 <div class="me">${userMessage}</div>
             </div>
         </div>
@@ -144,14 +143,17 @@ const populateUserMessage = (userMessage) => {
 
 const renderBotResponse = (response, uploadButtonHtml) => {
     if (!response) return;
-    
+
     STATE.responses.push(response);
     hideBotLoadingAnimation();
 
+    // Convert markdown to HTML
+    const parsedMarkdown = marked.parse(response.botResponse.trim());
+
     $('#message-list').append(`
         <div class="message-line">
-            <div class="message-box${!STATE.lightMode ? ' dark' : ''}">
-                ${response.botResponse.trim()}<br>${uploadButtonHtml}
+            <div class="markdown-content">
+                ${parsedMarkdown}${uploadButtonHtml ? '<br>' + uploadButtonHtml : ''}
             </div>
         </div>
     `);
@@ -175,9 +177,6 @@ const populateBotResponse = async (userMessage) => {
     let uploadButtonHtml = '';
     if (STATE.isFirstMessage) {
         response = {
-            botResponse: "Hello there! I'm your friendly AI assistant, ready to chat!"
-        };
-        response = { 
           botResponse: "Hello there! I'm your friendly data assistant, ready to answer any questions regarding your data. Could you please upload a PDF file for me to analyze?"
         };
         uploadButtonHtml = `
@@ -189,7 +188,7 @@ const populateBotResponse = async (userMessage) => {
     }
 
     renderBotResponse(response, uploadButtonHtml);
-    
+
     // Event listener for file upload
     if (STATE.isFirstMessage) {
     $("#upload-button").on("click", () => {
@@ -204,10 +203,10 @@ const populateBotResponse = async (userMessage) => {
             }
 
             await showBotLoadingAnimation();
-            
+
             const formData = new FormData();
             formData.append('file', file);
-            
+
             const response = await fetch(`${STATE.baseUrl}/process-document`, {
                 method: "POST",
                 headers: { Accept: "application/json" },
@@ -222,19 +221,38 @@ const populateBotResponse = async (userMessage) => {
             const responseData = await response.json();
             console.log('/process-document', responseData);
             renderBotResponse(responseData, '');
-            
+
         } catch (error) {
             console.error('File upload error:', error);
             showErrorMessage(error.message);
         }
     });
-    
+
     STATE.isFirstMessage = false;
 }
 };
 
+// Configure marked.js
+const configureMarked = () => {
+    // Set options for better security and features
+    marked.setOptions({
+        renderer: new marked.Renderer(),
+        gfm: true, // GitHub flavored markdown
+        breaks: true, // Convert line breaks to <br>
+        sanitize: false, // Don't sanitize HTML (we'll use DOMPurify if needed)
+        smartLists: true,
+        smartypants: true, // Use smart typographic punctuation
+        highlight: function(code, lang) {
+            return code; // Simple code highlighting
+        }
+    });
+};
+
 // Document ready handler
 $(document).ready(() => {
+    // Configure marked.js
+    configureMarked();
+
     // Initial setup
     $('#send-button').prop('disabled', true);
 
@@ -256,14 +274,6 @@ $(document).ready(() => {
         await resetVectorStore();
         document.querySelector('#upload-button').disabled = false;
         await populateBotResponse();
-    });
-
-    $('#light-dark-mode-switch').on('change', () => {
-        $('body').toggleClass('dark-mode');
-        $('.message-box').toggleClass('dark');
-        $('.loading-dots').toggleClass('dark');
-        $('.dot').toggleClass('dark-dot');
-        STATE.lightMode = !STATE.lightMode;
     });
 
     // Start the chat

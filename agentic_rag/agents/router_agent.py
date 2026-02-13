@@ -5,9 +5,12 @@ This agent analyzes user queries to decide whether they require external context
 from documents or can be answered directly using the model's knowledge.
 """
 
-import logging
 import json
-from typing import Any, Optional
+import logging
+from typing import Any
+
+from model import OllamaModelHandler
+
 from .base_agent import BaseAgent
 
 logger = logging.getLogger(__name__)
@@ -24,7 +27,8 @@ class RouterAgent(BaseAgent):
     Args:
         model_name (str, optional): The identifier of the Ollama model to use.
         ollama_host (str, optional): The host of the Ollama service.
-        confidence_threshold (float, optional): Threshold for routing decision (0-1). Default: 0.7.
+        confidence_threshold (float, optional): Threshold for routing decision (0-1).
+            Default: 0.7.
         chat_kwargs (dict[str, Any], optional): Additional keyword arguments for chat.
 
     Methods:
@@ -32,36 +36,37 @@ class RouterAgent(BaseAgent):
         execute: Analyzes query and returns routing decision.
     """
 
-    DEFAULT_SYSTEM_PROMPT = """You are a routing agent that determines if a user query requires external document retrieval.
+    DEFAULT_SYSTEM_PROMPT = """
+    You are a routing agent that determines if a user query requires external document retrieval.
 
     Analyze the query and respond with a JSON object containing:
     - "needs_retrieval": boolean indicating if document retrieval is needed
     - "confidence": float between 0 and 1 indicating confidence in the decision
     - "reasoning": brief explanation of the decision
-    
+
     Query types that NEED retrieval:
     - Questions about specific documents, papers, or uploaded content
     - Requests for information that requires domain-specific knowledge
     - Questions about data, statistics, or facts not in common knowledge
     - Queries referencing "the document", "the file", "uploaded content", etc.
-    
+
     Query types that DON'T need retrieval:
     - General knowledge questions
     - Casual conversation and greetings
     - Requests for explanations of common concepts
     - Math calculations or logic problems
     - Programming help with common languages/frameworks
-    
+
     Respond ONLY with valid JSON, no additional text."""
 
     def __init__(
         self,
-        model_handler=None,
-        model_name: Optional[str] = None,
-        ollama_host: Optional[str] = None,
+        model_handler: OllamaModelHandler | None = None,
+        model_name: str | None = None,
+        ollama_host: str | None = None,
         confidence_threshold: float = 0.7,
-        system_prompt: Optional[str] = None,
-        chat_kwargs: Optional[dict[str, Any]] = None,
+        system_prompt: str | None = None,
+        chat_kwargs: dict[str, Any] | None = None,
     ) -> None:
         """
         Initializes the RouterAgent with specified parameters.
