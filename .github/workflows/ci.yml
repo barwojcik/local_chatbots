@@ -33,6 +33,7 @@ jobs:
             agentic_rag: agentic_rag/**
             langchain_chat: langchain_chat/**
             langchain_rag: langchain_rag/**
+            llamaIndex_chat: llamaIndex_chat/**
             llamaIndex_rag: llamaIndex_rag/**
             ollama_chat: ollama_chat/**
             simple_chat: simple_chat/**

@@ -30,6 +30,11 @@ deployment.
 - Provides basic conversational capabilities
 - Runs completely offline
 
+#### [**LlamaIndex Chat**](./llamaIndex_chat/README.md)
+- Built using the `llamaindex` library
+- Provides basic conversational capabilities
+- Runs completely offline
+
 ### RAG (Retrieval-Augmented Generation)
 
 #### [**Simple RAG**](./simple_rag/README.md)
@@ -111,6 +116,11 @@ local_chatbots/
 │   ├── file_handler.py             # File upload utilities
 │   ├── model.py                    # LLM integration
 │   └── vector_store.py             # Vector database management
+├── llamaIndex_chat/
+│   ├── static/                     # Static web assets
+│   ├── templates/                  # HTML templates
+│   ├── app.py                      # Main Flask application
+│   └── config.py                   # Configuration settings
 ├── llamaIndex_rag/
 │   ├── static/                     # Static web assets
 │   ├── templates/                  # HTML templates
