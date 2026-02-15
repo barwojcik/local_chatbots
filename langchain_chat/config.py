@@ -9,4 +9,8 @@ import logging
 DEBUG = False
 TESTING = False
 LOG_LEVEL = logging.INFO
-MODEL = dict(ollama_host="http://localhost:11434", model_name="llama3.2:1b")
+MODEL = dict(
+    ollama_host="http://localhost:11434",
+    model_name="llama3.2:1b",
+    temperature=0.7,
+)
