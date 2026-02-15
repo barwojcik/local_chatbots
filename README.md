@@ -25,6 +25,11 @@ deployment.
 - Provides basic conversational capabilities
 - Runs completely offline
 
+#### [**LangChain Chat**](./langchain_chat/README.md)
+- Built using the `langchain` library
+- Provides basic conversational capabilities
+- Runs completely offline
+
 ### RAG (Retrieval-Augmented Generation)
 
 #### [**Simple RAG**](./simple_rag/README.md)
@@ -67,6 +72,8 @@ docker pull ghcr.io/barwojcik/local_chatbots/<APP_NAME>:latest
 Each application can be run from its respective directory. You can find detailed instructions inside each application's README.md file:
 - [**Simple Chat**](./simple_chat/README.md#installation)
 - [**Ollama Chat**](./ollama_chat/README.md#installation)
+- [**LangChain Chat**](./langchain_chat/README.md#installation)
+- [**LlamaIndex Chat**](./llamaIndex_chat/README.md#installation)
 - [**Simple RAG**](./simple_rag/README.md#installation)
 - [**LangChain RAG**](./langchain_rag/README.md#installation)
 - [**LlamaIndex RAG**](./llamaIndex_rag/README.md#installation)
@@ -91,6 +98,11 @@ local_chatbots/
 │   ├── file_handler.py             # File upload utilities
 │   ├── model.py                    # LLM integration
 │   └── vector_store.py             # Vector database management
+├── langchain_chat/
+│   ├── static/                     # Static web assets
+│   ├── templates/                  # HTML templates
+│   ├── app.py                      # Main Flask application
+│   └── config.py                   # Configuration settings
 ├── langchain_rag/
 │   ├── static/                     # Static web assets
 │   ├── templates/                  # HTML templates
