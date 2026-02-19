@@ -60,11 +60,11 @@ A powerful chatbot application that provides an interactive chat interface throu
 1. Make sure Ollama is running
 2. Start the application:
    ```bash
-   python app.py
+   python app/app.py
    ```
    or
    ```bash
-   flask --app app.py run
+   flask --app app/app.py run
    ```
    alternatively, start docker container
    ```bash

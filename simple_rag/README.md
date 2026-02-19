@@ -38,7 +38,7 @@ A powerful RAG-based chatbot application that enhances Large Language Model (LLM
    python -m venv venv
    source venv/bin/activate  # Linux/Mac
    ```
-   
+
 3. Install PyTorch and dependencies:
    ```bash
    pip install torch
@@ -57,7 +57,7 @@ A powerful RAG-based chatbot application that enhances Large Language Model (LLM
    docker run --gpus all \
        -e HF_TOKEN=<your_token> \
        -v /path/to/documents:/app/uploads \
-       -p 5000:5000 \ 
+       -p 5000:5000 \
        -n simple-rag \
        simple-rag
    ```
@@ -66,11 +66,11 @@ A powerful RAG-based chatbot application that enhances Large Language Model (LLM
 
 1. Start the application:
    ```bash
-   python app.py
+   python app/app.py
    ```
    or
    ```bash
-   flask --app app.py run
+   flask --app app/app.py run
    ```
    alternatively, start docker container
    ```bash

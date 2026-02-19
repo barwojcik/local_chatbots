@@ -38,7 +38,7 @@ A powerful RAG-based chatbot application that enhances Large Language Model (LLM
    python -m venv venv
    source venv/bin/activate  # Linux/Mac
    ```
-   
+
 3. Install dependencies:
    ```bash
    pip install -r requirements.txt
@@ -63,11 +63,11 @@ A powerful RAG-based chatbot application that enhances Large Language Model (LLM
 1. Make sure Ollama is running
 2. Start the application:
    ```bash
-   python app.py
+   python app/app.py
    ```
    or
    ```bash
-   flask --app app.py run
+   flask --app app/app.py run
    ```
    alternatively, start docker container
    ```bash

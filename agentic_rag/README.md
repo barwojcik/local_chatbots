@@ -49,7 +49,7 @@ An advanced multi-agent RAG (Retrieval-Augmented Generation) chatbot that intell
    python -m venv venv
    source venv/bin/activate  # Linux/Mac
    ```
-   
+
 3. Install dependencies:
    ```bash
    pip install -r requirements.txt
@@ -74,11 +74,11 @@ An advanced multi-agent RAG (Retrieval-Augmented Generation) chatbot that intell
 1. Make sure Ollama is running
 2. Start the application:
    ```bash
-   python app.py
+   python app/app.py
    ```
    or
    ```bash
-   flask --app app.py run
+   flask --app app/app.py run
    ```
    alternatively, start docker container
    ```bash
@@ -129,26 +129,27 @@ The system uses advanced document processing with semantic chunking:
 
 ```
 agentic_rag/
-├── agents/                      # Multi-agent system
-│   ├── __init__.py
-│   ├── base_agent.py           # Base agent class
-│   ├── router_agent.py         # Query routing
-│   ├── query_agent.py          # Query enhancement
-│   ├── retriever_agent.py      # Document retrieval
-│   └── synthesizer_agent.py    # Response generation
-├── app.py                      # Main Flask application
-├── config.py                   # Configuration settings
-├── document_processor.py       # Advanced document processing
-├── file_handler.py             # File upload utilities
-├── model.py                    # LLM integration
-├── vector_store.py             # Vector database management
-├── static/                     # Static web assets
-│   ├── script.js               # Frontend logic
-│   └── style.css               # Styling
-├── templates/                  # HTML templates
-│   └── index.html
-├── requirements.txt            # Python dependencies
-└── Dockerfile                  # Docker configuration
+└── app/
+    ├── agents/                      # Multi-agent system
+    │   ├── __init__.py
+    │   ├── base_agent.py           # Base agent class
+    │   ├── router_agent.py         # Query routing
+    │   ├── query_agent.py          # Query enhancement
+    │   ├── retriever_agent.py      # Document retrieval
+    │   └── synthesizer_agent.py    # Response generation
+    ├── app.py                      # Main Flask application
+    ├── config.py                   # Configuration settings
+    ├── document_processor.py       # Advanced document processing
+    ├── file_handler.py             # File upload utilities
+    ├── model.py                    # LLM integration
+    ├── vector_store.py             # Vector database management
+    ├── static/                     # Static web assets
+    │   ├── script.js               # Frontend logic
+    │   └── style.css               # Styling
+    ├── templates/                  # HTML templates
+    │   └── index.html
+    ├── requirements.txt            # Python dependencies
+    └── Dockerfile                  # Docker configuration
 ```
 
 ## Configuration

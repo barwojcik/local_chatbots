@@ -89,7 +89,7 @@ Each application can be run from its respective directory. You can find detailed
 ## Project Structure
 ```text
 local_chatbots/
-├── agentic_rag/
+├── agentic_rag/app/
 │   ├── agents/                     # Multi-agent system
 │   │   ├── base_agent.py           # Base agent class
 │   │   ├── query_agent.py          # Query enhancement
@@ -103,12 +103,12 @@ local_chatbots/
 │   ├── file_handler.py             # File upload utilities
 │   ├── model.py                    # LLM integration
 │   └── vector_store.py             # Vector database management
-├── langchain_chat/
+├── langchain_chat/app/
 │   ├── static/                     # Static web assets
 │   ├── templates/                  # HTML templates
 │   ├── app.py                      # Main Flask application
 │   └── config.py                   # Configuration settings
-├── langchain_rag/
+├── langchain_rag/app/
 │   ├── static/                     # Static web assets
 │   ├── templates/                  # HTML templates
 │   ├── app.py                      # Main Flask application
@@ -116,12 +116,12 @@ local_chatbots/
 │   ├── file_handler.py             # File upload utilities
 │   ├── model.py                    # LLM integration
 │   └── vector_store.py             # Vector database management
-├── llamaIndex_chat/
+├── llamaIndex_chat/app/
 │   ├── static/                     # Static web assets
 │   ├── templates/                  # HTML templates
 │   ├── app.py                      # Main Flask application
 │   └── config.py                   # Configuration settings
-├── llamaIndex_rag/
+├── llamaIndex_rag/app/
 │   ├── static/                     # Static web assets
 │   ├── templates/                  # HTML templates
 │   ├── app.py                      # Main Flask application
@@ -129,19 +129,19 @@ local_chatbots/
 │   ├── file_handler.py             # File upload utilities
 │   ├── model.py                    # LLM integration
 │   └── vector_store.py             # Vector database management
-├── ollama_chat/
+├── ollama_chat/app/
 │   ├── static/                     # Static web assets
 │   ├── templates/                  # HTML templates
 │   ├── app.py                      # Main Flask application
 │   ├── config.py                   # Configuration settings
 │   └── model.py                    # LLM integration
-├── simple_chat/
+├── simple_chat/app/
 │   ├── static/                     # Static web assets
 │   ├── templates/                  # HTML templates
 │   ├── app.py                      # Main Flask application
 │   ├── config.py                   # Configuration settings
 │   └── model.py                    # LLM integration
-└── simple_rag/
+└── simple_rag/app/
     ├── static/                     # Static web assets
     ├── templates/                  # HTML templates
     ├── app.py                      # Main Flask application

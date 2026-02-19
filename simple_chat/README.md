@@ -35,7 +35,7 @@ A powerful chatbot application that provides an interactive chat interface throu
    python -m venv venv
    source venv/bin/activate  # Linux/Mac
    ```
-   
+
 3. Install PyTorch and dependencies:
    ```bash
    pip install torch
@@ -62,11 +62,11 @@ A powerful chatbot application that provides an interactive chat interface throu
 
 1. Start the application:
    ```bash
-   python app.py
+   python app/app.py
    ```
    or
    ```bash
-   flask --app app.py run
+   flask --app app/app.py run
    ```
    alternatively, start docker container
    ```bash
