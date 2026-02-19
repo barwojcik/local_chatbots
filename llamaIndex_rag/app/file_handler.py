@@ -83,12 +83,12 @@ class FileHandler:
         """Create an upload directory if it doesn't exist."""
         os.makedirs(self.upload_folder, exist_ok=True)
 
-    def _allowed_file(self, filename: str) -> None:
+    def _allowed_file(self, filename: str | None) -> None:
         """
         Check if the file extension is allowed.
 
         Args:
-            filename (str): Name of the file to check.
+            filename (str | None): Name of the file to check.
 
         Raises:
             ValueError: If the file is not allowed or does not exist.
@@ -117,7 +117,7 @@ class FileHandler:
 
         """
         self._allowed_file(file.filename)
-        filename: str = secure_filename(file.filename)
+        filename: str = secure_filename(file.filename)  # type: ignore[arg-type]
         file_path: str = os.path.join(self.upload_folder, filename)
         file.save(file_path)
         logger.info("File saved successfully at: %s", file_path)
